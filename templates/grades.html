@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    List
+{% endblock %}
+
+{% block main %}
+    <div class="mb-3">
+        <h5>Students taking this subject:</h5>
+        <h6>{{ subject_name[0]['name'] }}</h6>
+    </div>
+    <div class="mb-3">
+            <table>
+                <thead>
+                    <tr class="high">
+                        <th>ID</th>
+                        <th>Names</th>
+                        <th>Surnames</th>
+                        <th>Grade</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for student in list_students %}
+                        <tr>
+                            <td>{{ student['id'] }}</td>
+                            <td>{{ student['names'] }}</td>
+                            <td>{{ student['surnames'] }}</td>
+                            <td>{{ student['grade'] }}</td>
+                            <td>                     
+                                <button type="button" onclick="showForm(this)">Edit</button>
+                                <form id="edit-form-{{ loop.index }}" style="display: none;" action="/grades" method="post">
+                                    <input type="hidden" name="id_student" value="{{ student['id'] }}">
+                                    <input type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10">
+                                    <input type="submit" value="Save">
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+            <script>
+                function showForm(button) {
+                  // Obtener el índice de la fila (asumiendo que los botones tienen la misma estructura)
+                  var rowIndex = button.parentNode.parentNode.rowIndex;
+                  
+                  // Obtener el ID del formulario
+                  var formId = "edit-form-" + rowIndex;
+    
+                  // Mostrar el formulario
+                  document.getElementById(formId).style.display = "block";
+                }
+    
+                function redirectHome() {
+                    window.location.href = "/";
+                }
+            </script>
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary" onclick="redirect_password()">Edit Password</button>
+        <button class="btn btn-primary" onclick="redirect_wallet()">ADD MORE CASH</button>
+
+        <script>
+            function redirect_password() {
+                window.location.href = "/edit_pass";
+            }
+
+            function redirect_wallet() {
+                window.location.href = "/add_cash";
+            }
+        </script>
+    </div>
+{% endblock %}

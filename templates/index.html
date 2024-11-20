@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+    <div class="mb-3">
+        <h5>Welcome, {{ instructor[0]['names'] }} {{ instructor[0]['surnames'] }}</h5>
+        <h3>I'm teaching...</h3>
+    </div>
+    <div class="mb-3">
+        <table>
+            <thead>
+                <tr class="high">
+                    <th>Name</th>
+                    <th>Faculty</th>
+                    <th>Semester</th>
+                    <th>Students</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for subject in subjects %}
+                    <tr>
+                        <td>{{ subject['name'] }}</td>
+                        <td>{{ subject['field'] }}</td>
+                        <td>{{ subject['semester'] }}</td>
+                        <td>
+                            <form action="/" method="post">
+                                <input type="hidden" name="check" value="{{ subject['id'] }}">
+                                <input type="submit" value="View">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
