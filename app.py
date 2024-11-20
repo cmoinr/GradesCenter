@@ -1,6 +1,7 @@
 import os
 import requests
 import sqlite3
+import re
 
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
@@ -257,8 +258,14 @@ def register():
         unique_code = request.form.get("unique_code")
         faculty = request.form.get("faculty")
 
+        # Validations
         if not i_am or not id or not names or not surnames or not password or not confirmation:
             return apology("all fields need to be filled", 400)
+        
+        if not re.match(r"^\d{8}$", id):
+            return apology("ID must be only numbers", 400)
+        elif not re.match(r"^[a-zA-Z]+$", names) or not re.match(r"^[a-zA-Z]+$", surnames):
+            return apology("Invalid names/surnames", 400)
         
         if password == confirmation:
             password = generate_password_hash(confirmation, method='scrypt', salt_length=16)            
