@@ -21,9 +21,6 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///gradescenter.db")
 
-# Global variables
-selected_subject = "Subject code"
-
 
 @app.after_request
 def after_request(response):
