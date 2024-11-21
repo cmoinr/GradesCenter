@@ -24,23 +24,26 @@ db = SQL("sqlite:///gradescenter.db")
 
 @app.after_request
 def after_request(response):
-    """Ensure responses aren't cached"""
+    # Ensure responses aren't cached
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
+    
     return response
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    """Teacher main page"""
+    # Teacher main page
     if request.method == "POST":
+        # Redirect to selected subject's list of students
         selected_subject = request.form.get("check")
 
         session["selected_subject"] = selected_subject
 
         return redirect("/grades")
-    else:   
+    else: 
+        # Querying subjects that the teacher are teaching
         subjects = db.execute("""
             SELECT subjects.id, subjects.name, faculty.field, subjects.semester
             FROM subjects
@@ -50,6 +53,7 @@ def index():
             WHERE teaching.id_teacher = ?
         """, session["user_id"])
 
+        # Querying subject's name
         instructor = db.execute("SELECT names, surnames FROM teachers WHERE id = ?", session["user_id"])
 
         return render_template("index.html", subjects=subjects, instructor=instructor)
@@ -58,8 +62,9 @@ def index():
 @app.route("/grades", methods=["GET", "POST"])
 @login_required
 def grades():
+    # List of students who are studying the selected subject
     if request.method == "POST":
-
+        # Getting the grade provided by a teacher
         grade = int(request.form.get("grade"))
         id_student = request.form.get("id_student")
         id_subject = session.get("selected_subject")
@@ -79,7 +84,7 @@ def grades():
         return redirect("/grades")
     
     else:  
-
+        # List of students
         list_students = db.execute("""
             SELECT students.id, students.names, students.surnames, grades.grade
             FROM students
@@ -88,7 +93,9 @@ def grades():
             WHERE studying.id_subject = ?
         """, session.get("selected_subject"))
 
-        subject_name = db.execute("SELECT name FROM subjects WHERE id = ?", session.get("selected_subject"))
+        subject_name = db.execute("""
+            SELECT name FROM subjects WHERE id = ?
+        """, session.get("selected_subject"))
 
         return render_template("grades.html", list_students=list_students, subject_name=subject_name)
 
@@ -96,8 +103,7 @@ def grades():
 @app.route("/student")
 @login_required
 def student():
-    """Student main page"""
-
+    # Student main page
     subjects = db.execute("""
         SELECT subjects.name, subjects.semester, subjects.credits, grades.grade, teachers.names, teachers.surnames
         FROM subjects
@@ -108,7 +114,9 @@ def student():
         WHERE studying.id_student = ?
     """, session["user_id"])
 
-    learner = db.execute("SELECT names, surnames FROM students WHERE id = ?", session["user_id"])
+    learner = db.execute("""
+        SELECT names, surnames FROM students WHERE id = ?
+    """, session["user_id"])
 
     return render_template("student.html", subjects=subjects, learner=learner)
 
@@ -130,8 +138,13 @@ def add_subjects():
         if len(subjects) == 1:
             return apology("registered subject", 400)
         else:
-            db.execute("INSERT INTO studying (id_student, id_subject) VALUES (?, ?)", session["user_id"], adding)
-            db.execute("INSERT INTO grades (id_student, id_subject, grade) VALUES (?, ?, ?)", session["user_id"], adding, 0)
+            db.execute("""
+                INSERT INTO studying (id_student, id_subject) VALUES (?, ?)
+            """, session["user_id"], adding)
+
+            db.execute("""
+                INSERT INTO grades (id_student, id_subject, grade) VALUES (?, ?, ?)
+            """, session["user_id"], adding, 0)
             
             return redirect("/student")
     
@@ -149,7 +162,7 @@ def add_subjects():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Log user in"""
+    # Log user in
 
     # Forget any user_id
     session.clear()
@@ -235,14 +248,18 @@ def subjects():
         
     else:  
 
-        subjects = db.execute("SELECT subjects.id, name, field, semester FROM subjects JOIN faculty ON subjects.id_faculty = faculty.id")
+        subjects = db.execute("""
+            SELECT subjects.id, name, field, semester
+            FROM subjects 
+            JOIN faculty ON subjects.id_faculty = faculty.id
+        """)
 
         return render_template("subjects.html", subjects=subjects)
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Register user"""
+    # Register user
     if request.method == "POST":
 
         i_am = request.form.get("i_am") 
@@ -274,7 +291,10 @@ def register():
                 return apology("all fields need to be filled", 400)
             
             try:
-                db.execute("INSERT INTO students (id, names, surnames, hash, id_faculty) VALUES(?, ?, ?, ?, ?)", id, names, surnames, password, faculty)
+                db.execute("""
+                    INSERT INTO students (id, names, surnames, hash, id_faculty) 
+                    VALUES(?, ?, ?, ?, ?)
+                """, id, names, surnames, password, faculty)
             except ValueError:
                 return apology("registered username", 400)
         
@@ -283,7 +303,10 @@ def register():
                 return apology("incorrect teacher code", 400)
             
             try:
-                db.execute("INSERT INTO teachers (id, names, surnames, hash) VALUES(?, ?, ?, ?)", id, names, surnames, password)
+                db.execute("""
+                    INSERT INTO teachers (id, names, surnames, hash)
+                    VALUES(?, ?, ?, ?)
+                """, id, names, surnames, password)
             except ValueError:
                 return apology("registered username", 400)
 
