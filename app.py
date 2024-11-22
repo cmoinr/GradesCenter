@@ -45,7 +45,7 @@ def index():
     else: 
         # Querying subjects that the teacher are teaching
         subjects = db.execute("""
-            SELECT subjects.id, subjects.name, faculty.field, subjects.semester, subjects.year
+            SELECT subjects.id, subjects.name, faculty.field, subjects.semester
             FROM subjects
             JOIN faculty ON subjects.id_faculty = faculty.id
             JOIN teaching ON subjects.id = teaching.id_subject
@@ -105,7 +105,7 @@ def grades():
 def student():
     # Student main page
     subjects = db.execute("""
-        SELECT subjects.name, subjects.semester, subjects.year, subjects.credits, grades.grade, teachers.names, teachers.surnames
+        SELECT subjects.name, subjects.semester, subjects.credits, grades.grade, teachers.names, teachers.surnames
         FROM studying
         JOIN students ON studying.id_student = students.id
         JOIN grades   ON studying.id_subject = grades.id_subject
@@ -152,7 +152,7 @@ def add_subjects():
     else:   
             
         subjects_available = db.execute("""
-            SELECT subjects.id, subjects.name, subjects.semester, subjects.year, subjects.credits
+            SELECT subjects.id, subjects.name, subjects.semester, subjects.credits
             FROM subjects
             JOIN students ON subjects.id_faculty = students.id_faculty
             WHERE students.id = ?
@@ -258,7 +258,7 @@ def subjects():
     else:  
 
         subjects = db.execute("""
-            SELECT subjects.id, name, field, semester, year
+            SELECT subjects.id, name, field, semester
             FROM subjects 
             JOIN faculty ON subjects.id_faculty = faculty.id
         """)

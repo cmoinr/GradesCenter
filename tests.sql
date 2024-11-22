@@ -33,5 +33,4 @@
 -- WHERE studying.id_student = 25000100
 
 -- DELETE FROM teaching
--- WHERE id_teacher = 29959129
--- AND id_subject = 'LM002'
+-- WHERE id_teacher = 23500120;
