@@ -1,3 +1,8 @@
+body {
+    font-family: 'Montserrat', sans-serif;  
+    background-color:#1c2833;
+}
+
 /* Size for brand */
 nav .navbar-brand
 {
@@ -28,6 +33,10 @@ nav .navbar-brand
     color: #d5d8dc;
     border: 0.5px solid #d5d8dc;
     background-color: #d5d8dc;
+}
+
+#main_bar {
+    background: #294661;
 }
 
 h3, h5, h6 {
@@ -61,7 +70,40 @@ table td {
     border: 1px solid #d5d8dc;
 }
 
-/* button */
+@media only screen and (max-width: 480px) {
+    table th, table td {
+        width: auto;
+        height: auto;
+        font-size: 50%;
+        padding: 0.25rem;
+        vertical-align: middle;
+    }
+
+    #main_bar {
+        width: 100%;
+    }
+
+    .enroll {
+        width: auto;
+        height: auto;
+        padding: 0.25rem;
+    }
+
+    .btn {
+        width: auto;
+        height: auto;
+        padding: 0.25rem;
+        font-size: 100%;
+    }
+
+    .filter {
+        height: auto;
+        width: auto;
+        padding: 0.25rem;
+    }
+}
+
+/* buttons */
 .btn {
     background-color: transparent;
     border-radius: 5px;
@@ -74,15 +116,6 @@ table td {
     background-color: #d5d8dc;
     color: #1c2833;
     border: 0.5px solid #d5d8dc;
-}
-
-body {
-    font-family: 'Montserrat', sans-serif;  
-    background-color:#1c2833;
-}
-
-#main_bar {
-    background: #294661;
 }
 
 input {
