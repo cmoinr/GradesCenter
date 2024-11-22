@@ -1,12 +1,12 @@
 # GradesCenter
-#### Video Demo:  <URL HERE>
-#### Description:
+#### Video Demo  <URL HERE>
+#### Description
 
 In my final CS50 project I decided to create a web application to manage student grades at a university. My purpose with this proposal will be to provide a practical, efficient and user-friendly solution when an educational institution (with the help of its teachers) needs to back up the grades of each of its students safely and in one place; in the same way, so that students have guaranteed access to the grades of their different subjects.
 
 All this was inspired by a problematic situation that occurs at my university every time the enrollment season and the beginning of the semester arrive: unfortunately, the system collapses due to the volume of active users and requests to the servers, causing displeasure in the student population and inconveniences related to registering for the required subjects according to the current period.
 
-#### In my web application I have used:
+#### In my web application I have used
 
 - **Flask**, to provide dynamism to my utility
 
@@ -20,7 +20,7 @@ All this was inspired by a problematic situation that occurs at my university ev
 
 - **JavaScript**, to make the user's experience more interactive when using the software, through buttons and various actions
 
-#### Files used in my project:
+#### Files used in my project
 
 - <ins>**app.py:**</ins> First, all the libraries needed for the project are imported (os, requests, sqlite3, re, cs50, flask, werkzeug.security). Then, the application is configured using Flask and the database is linked. Next, the routes (through functions) that my app will have are defined, as well as its logic and behavior according to the HTTP methods: "GET" and "POST", this derived from the user's behavior.
 
@@ -74,26 +74,26 @@ _It consists of 7 SQL tables:_
 
 - <ins>**logo.ico:**</ins> I designed this icon to further enhance the exterior finish of my interface.
 
-#### HTML templates:
+#### HTML templates
 
-- "layout": Es la plantilla (diseño) principal de la app. De este archivo se derivan las demás plantillas gracias a la implementación de Jinja. Despliega la barra de navegación principal y el pie de página.
+- **layout:** This is the main template (design) of the app. The other templates are derived from this file thanks to the implementation of Jinja. It displays the main navigation bar and the footer.
 
-- "index": Es la página principal cuando quien inicia sesión es un profesor. Muestra una tabla con la información de las materias que esta enseñando en ese período dicho maestro. En cada fila (que indica una materia) hay un botón que le permite al profesor ver el listado de estudiantes inscritos en dicha materia.
+- **index:** This is the main page when the person logging in is a teacher. It shows a table with the information of the subjects that the teacher is teaching in that period. In each row (which indicates a subject) there is a button that allows the teacher to see the list of students enrolled in that subject.
 
-- "student": Es la página principal cuando quien inicia sesión es un estudiante. Muestra una tabla con la información de las materias inscritas de dicho estudiante, y le permite visualizar cual fueron sus notas al final del semestre.
+- **student:** This is the main page when the person logging in is a student. It shows a table with the information of the subjects enrolled by the student, and allows her/him to see what his grades were at the end of the semester.
 
-- "add_subjects": Le permite al estudiante inscribirse en las materias que le correspondan según su período de estudio. Muestra una tabla con las materias identificadas por semestre y según la facultad a donde pertenezca. Cada fila tiene un boton para "inscribirse".
+- **add_subjects:** It allows the student to enroll in the subjects that correspond to his study period. It shows a table with the subjects identified by semester and according to the faculty to which he belongs. Each row has a button to "enroll".
 
-- "apology": Es una plantilla que muestra al usuario un mensaje de error personalizado. Facilita la comprensión del inconveniente ocurrido para mejorar la experiencia del usuario.
+- **apology:** This is a template that shows the user a customized error message. It makes it easier to understand the problem that occurred in order to improve the user experience.
 
-- "edit_pass": Muestra un pequeño formulario donde el usuario ingresará los datos necesarios para llevar a cabo el cambio de su contraseña satisfactoriamente.
+- **edit_pass:** This shows a small form where the user will enter the necessary data to successfully change their password.
 
-- "grades": Muestra una tabla que es la lista de estudiantes inscritos en una determinada materia. Permite al profesor ver quien conforma su grupo de alumnos y también añadir o actualizar la nota de cada estudiante al final del semestre.
+- **grades:** This shows a table that is the list of students enrolled in a certain subject. It allows the teacher to see who makes up their group of students and also to add or update the grade of each student at the end of the semester.
 
-- "login": Es la página de inicio de sesión. Muestra el formulario adecuado para que el usuario ingrese sus datos y pueda ser redirigido a "index" o "student".
+- **login:** This is the login page. It shows the appropriate form for the user to enter their data and can be redirected to "index" or "student".
 
-- "register": Muestra el formulario adecuado para que un usuario pueda registrarse al sistema. 
+- **register:** This shows the appropriate form for a user to register to the system.
 
-- "settings": Muestra algunos botones que le permitirán al usuario configurar algunos aspectos de su información almacenada.
+- **settings:** This shows some buttons that will allow the user to configure some aspects of their stored information.
 
-- "subjects": Le permite al profesor añadir las materias que requiera según el período en curso. Muestra una tabla con las materias identificadas por semestre y según la facultad en que se enseña. Cada fila tiene un boton para "Seleccionar".
+- **subjects:** This allows the teacher to add the subjects they require according to the current period. Displays a table with the subjects identified by semester and according to the faculty in which they are taught. Each row has a "Select" button.
