@@ -22,55 +22,57 @@ All this was inspired by a problematic situation that occurs at my university ev
 
 #### Files used in my project:
 
-- <ins>**"app.py":**</ins> First, all the libraries needed for the project are imported (os, requests, sqlite3, re, cs50, flask, werkzeug.security). Then, the application is configured using Flask and the database is linked. Next, the routes (through functions) that my app will have are defined, as well as its logic and behavior according to the HTTP methods: "GET" and "POST", this derived from the user's behavior.
+- <ins>**app.py:**</ins> First, all the libraries needed for the project are imported (os, requests, sqlite3, re, cs50, flask, werkzeug.security). Then, the application is configured using Flask and the database is linked. Next, the routes (through functions) that my app will have are defined, as well as its logic and behavior according to the HTTP methods: "GET" and "POST", this derived from the user's behavior.
 
-    _There are a total of 11 functions:_
-        1. **after_request** - It ensures that the browser where my app is run does not cache information, this to provide the user with dynamic content as required at the time. It also provides a layer of security by not allowing sensitive data to be cached.
+_There are a total of 11 functions:_
 
-        2. **index** - Query the database to filter the information and show the subjects that a teacher is in charge of. That is, those that he is teaching in a given period. Stores the ID of the subject selected by the teacher to redirect her/him to the list of students who are viewing that subject in that period.
+1. **after_request** - It ensures that the browser where my app is run does not cache information, this to provide the user with dynamic content as required at the time. It also provides a layer of security by not allowing sensitive data to be cached.
 
-        3. **grades** - Query in the database to filter the information and display the list of students who are enrolled in the subject selected by the teacher. Stores the grade entered by the teacher and updates its value in the database. Validates the grade entry within a specific valid range.
+2. **index** - Query the database to filter the information and show the subjects that a teacher is in charge of. That is, those that he is teaching in a given period. Stores the ID of the subject selected by the teacher to redirect her/him to the list of students who are viewing that subject in that period.
 
-        4. **student** - Query in the database to filter the information and display everything related to the subjects enrolled by a student.
+3. **grades** - Query in the database to filter the information and display the list of students who are enrolled in the subject selected by the teacher. Stores the grade entered by the teacher and updates its value in the database. Validates the grade entry within a specific valid range.
 
-        5. **add_subjects** - Query in the database for the available subjects according to the faculty in which the student in question is enrolled, in order to display a detailed list and, depending on the selection, carry out the registration: inserting the information in the database. Validates that the student can only be enrolled in a subject once in a semester.
+4. **student** - Query in the database to filter the information and display everything related to the subjects enrolled by a student.
 
-        6. **login** - Stores the information provided by the user to be able to log in and give her/him access to the "home". Validates that the inputs are entered correctly. Checks the database, as previously obtained, that the user ID is registered and the password is correct. Creates the session and identifies whether it was a teacher or a student.
+5. **add_subjects** - Query in the database for the available subjects according to the faculty in which the student in question is enrolled, in order to display a detailed list and, depending on the selection, carry out the registration: inserting the information in the database. Validates that the student can only be enrolled in a subject once in a semester.
 
-        7. **logout** - Closes the session and forgets the information provided by the user, to better protect the data of each user.
+6. **login** - Stores the information provided by the user to be able to log in and give her/him access to the "home". Validates that the inputs are entered correctly. Checks the database, as previously obtained, that the user ID is registered and the password is correct. Creates the session and identifies whether it was a teacher or a student.
 
-        8. **subjects** - Checks the database for the subjects available to a certain teacher regardless of the faculty. Stores the ID of the selected subject to insert the corresponding data into the database and record that said teacher is teaching that subject.
+7. **logout** - Closes the session and forgets the information provided by the user, to better protect the data of each user.
 
-        9. **register** - Stores the information provided by the user in order to register her/him and add her/his data to the database. Validates that the requested inputs are entered correctly, implementing server-side validation. It also validates that there cannot be registered users with the same ID, which must be unique per person. Identifies whether a teacher or a student has registered so that the data is taken to the correct table in the database.
+8. **subjects** - Checks the database for the subjects available to a certain teacher regardless of the faculty. Stores the ID of the selected subject to insert the corresponding data into the database and record that said teacher is teaching that subject.
 
-        10. **edit_pass** - Stores the information provided by the user in order to change his password. Validates these inputs by verifying that the password entered is correct and that the new password is confirmed twice; if everything is in order, proceeds to update the hash (stored in the database) of the corresponding user.
+9. **register** - Stores the information provided by the user in order to register her/him and add her/his data to the database. Validates that the requested inputs are entered correctly, implementing server-side validation. It also validates that there cannot be registered users with the same ID, which must be unique per person. Identifies whether a teacher or a student has registered so that the data is taken to the correct table in the database.
 
-        11. **settings** - Only returns an HTML template for the user.
+10. **edit_pass** - Stores the information provided by the user in order to change his password. Validates these inputs by verifying that the password entered is correct and that the new password is confirmed twice; if everything is in order, proceeds to update the hash (stored in the database) of the corresponding user.
 
-- <ins>**"helpers.py":**</ins> Two very important functions are implemented for the web application: 'apology', which provides the user with a personalized error message depending on the problem that has occurred; and 'login_required', which is responsible for providing security for access to certain routes in my application where access should only be possible after successfully logging in.
+11. **settings** - Only returns an HTML template for the user.
 
-- <ins>**"gradescenter.db":**</ins> This is one of the most important files in the project: it is the database, where all the information is going to be stored in a secure and structured way. I designed it from scratch, using paper and pencil, and was inspired by how I could handle all this data set (grades, names, surnames, professors) efficiently. 
+- <ins>**helpers.py:**</ins> Two very important functions are implemented for the web application: 'apology', which provides the user with a personalized error message depending on the problem that has occurred; and 'login_required', which is responsible for providing security for access to certain routes in my application where access should only be possible after successfully logging in.
 
-    _It consists of 7 SQL tables:_
-        1. **faculty** - Stores the name of the faculties and relates them to a unique ID.
+- <ins>**gradescenter.db:**</ins> This is one of the most important files in the project: it is the database, where all the information is going to be stored in a secure and structured way. I designed it from scratch, using paper and pencil, and was inspired by how I could handle all this data set (grades, names, surnames, professors) efficiently. 
 
-        2. **grades** - Stores the grade obtained by a student in a certain subject. This grade is related to the unique ID of the student and the subject.
+_It consists of 7 SQL tables:_
 
-        3. **students** - Stores crucial data pertaining to the students: ID, names, surnames, current semester, credits obtained according to passing subjects, their login hash, ID of the faculty to which they belong.
+1. **faculty** - Stores the name of the faculties and relates them to a unique ID.
 
-        4. **studying** - Stores the student ID related to the ID of the subject they are taking. It has a "many to many" relationship, since many students can see many subjects.
+2. **grades** - Stores the grade obtained by a student in a certain subject. This grade is related to the unique ID of the student and the subject.
 
-        5. **subjects** - Stores crucial data about the subjects (the curriculum) taught at the school: unique ID, name, faculty where it is taught, semester it belongs to, and number of credit units awarded.
+3. **students** - Stores crucial data pertaining to the students: ID, names, surnames, current semester, credits obtained according to passing subjects, their login hash, ID of the faculty to which they belong.
 
-        6. **teachers** - Stores crucial data pertaining to teachers: ID, first names, last names, and their login hash.
+4. **studying** - Stores the student ID related to the ID of the subject they are taking. It has a "many to many" relationship, since many students can see many subjects.
 
-        7. **teaching** - Stores the teacher's ID related to the subject ID they are teaching. It has a "many to many" relationship, since many teachers can teach many subjects.
+5. **subjects** - Stores crucial data about the subjects (the curriculum) taught at the school: unique ID, name, faculty where it is taught, semester it belongs to, and number of credit units awarded.
 
-- <ins>**"requirements.txt":**</ins> Contains all the Python packages (libraries, modules) that are required for this project to work properly.
+6. **teachers** - Stores crucial data pertaining to teachers: ID, first names, last names, and their login hash.
 
-- <ins>**"styles.css":**</ins> Contains all the CSS properties of the elements used through HTML. This is to give style and presentation to my web application.
+7. **teaching** - Stores the teacher's ID related to the subject ID they are teaching. It has a "many to many" relationship, since many teachers can teach many subjects.
 
-- <ins>**"logo.ico":**</ins> I designed this icon to further enhance the exterior finish of my interface.
+- <ins>**requirements.txt:**</ins> Contains all the Python packages (libraries, modules) that are required for this project to work properly.
+
+- <ins>**styles.css:**</ins> Contains all the CSS properties of the elements used through HTML. This is to give style and presentation to my web application.
+
+- <ins>**logo.ico:**</ins> I designed this icon to further enhance the exterior finish of my interface.
 
 #### HTML templates:
 
