@@ -147,6 +147,7 @@ def add_subjects():
                 INSERT INTO grades (id_student, id_subject, grade) VALUES (?, ?, ?)
             """, session["user_id"], adding, 0)
             
+            flash("Subject added!", "success")
             return redirect("/student")
     
     else:   
@@ -319,6 +320,7 @@ def register():
             except ValueError:
                 return apology("registered username", 400)
 
+        flash('Registered!', 'success')
         return redirect("/login")
 
     else:
@@ -349,21 +351,23 @@ def edit_pass():
             else:
                 return apology("incorrect password", 403)
             
+            flash('Password changed!', 'success')
+            return redirect('/student')
+            
         elif session["role"] == "teacher":
             update = db.execute("SELECT hash FROM teachers WHERE id = ?", session["user_id"])
 
             if check_password_hash(update[0]['hash'], old):
                 if new == again:
-                    new = generate_password_hash(again, method='scypt', salt_length=16)
+                    new = generate_password_hash(again, method='scrypt', salt_length=16)
                     db.execute("UPDATE teachers SET hash = ? WHERE id = ?", new, session["user_id"])
                 else:
                     return apology("both passwords don't match", 400)
             else:
                 return apology("incorrect password", 403)
             
-
-        flash('Password changed!', 'success')
-        return redirect('/')
+            flash('Password changed!', 'success')
+            return redirect('/')
 
     else:
         return render_template("edit_pass.html")
