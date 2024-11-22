@@ -30,11 +30,7 @@ nav .navbar-brand
     background-color: #d5d8dc;
 }
 
-h5 {
-    color: #d5d8dc; 
-}
-
-h3 {
+h3, h5, h6 {
     color: #d5d8dc;
 }
 
@@ -116,6 +112,18 @@ input::placeholder {
     background-color: #d5d8dc;
     color: #1c2833;
     border: 0.5px solid #d5d8dc;
+}
+
+.grade_value {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    color: #d5d8dc;
+    width: 45px;
+    height: 35px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 select {

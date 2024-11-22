@@ -29,11 +29,11 @@
                             <td>{{ student['surnames'] }}</td>
                             <td>{{ student['grade'] }}</td>
                             <td>                     
-                                <button type="button" onclick="showForm(this)">Edit</button>
+                                <button class="btn btn-primary" type="button" onclick="showForm(this)">Edit</button>
                                 <form id="edit-form-{{ loop.index }}" style="display: none;" action="/grades" method="post">
                                     <input type="hidden" name="id_student" value="{{ student['id'] }}">
-                                    <input type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10">
-                                    <input type="submit" value="Save">
+                                    <input class="grade_value" type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10" minlength="1">
+                                    <input class="enroll" type="submit" value="Save">
                                 </form>
                             </td>
                         </tr>
@@ -52,24 +52,6 @@
                   // Mostrar el formulario
                   document.getElementById(formId).style.display = "block";
                 }
-    
-                function redirectHome() {
-                    window.location.href = "/";
-                }
             </script>
-    </div>
-    <div class="mb-3">
-        <button class="btn btn-primary" onclick="redirect_password()">Edit Password</button>
-        <button class="btn btn-primary" onclick="redirect_wallet()">ADD MORE CASH</button>
-
-        <script>
-            function redirect_password() {
-                window.location.href = "/edit_pass";
-            }
-
-            function redirect_wallet() {
-                window.location.href = "/add_cash";
-            }
-        </script>
     </div>
 {% endblock %}

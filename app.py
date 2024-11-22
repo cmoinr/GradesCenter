@@ -65,19 +65,19 @@ def grades():
     # List of students who are studying the selected subject
     if request.method == "POST":
         # Getting the grade provided by a teacher
-        grade = int(request.form.get("grade"))
+        grade = request.form.get("grade")
         id_student = request.form.get("id_student")
         id_subject = session.get("selected_subject")
 
-        if not id_student:
+        if not id_student or not grade:
             return apology("incomplete data error", 400)
         
-        if grade >= 0 or grade <= 10:
+        if int(grade) >= 0 or int(grade) <= 10:
             db.execute("""
                 UPDATE grades SET grade = ? 
                 WHERE id_student = ?
                 AND id_subject = ?
-            """, grade, id_student, id_subject)
+            """, int(grade), id_student, id_subject)
         else:
             return apology("wrong data error", 400)
 
