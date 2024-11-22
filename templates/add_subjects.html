@@ -27,8 +27,8 @@
                         <td>{{ subject['credits'] }}</td>
                         <td>
                             <form action="/add_subjects" method="post">
-                                <input type="hidden" name="selected" value="{{ subject['id'] }}">
-                                <input type="submit" value="Enroll">
+                                <input class="enroll" type="hidden" name="selected" value="{{ subject['id'] }}">
+                                <input class="enroll" type="submit" value="Enroll">
                             </form>
                         </td>
                     </tr>

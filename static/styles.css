@@ -4,13 +4,38 @@ nav .navbar-brand
     font-size: xx-large;   
 }
 
-#main_brand {
-    color: rgba(9,9,121,1);
+.navbar-brand {
+    color: #d5d8dc;
+    transition-duration: 0.5s;
+}
+
+.navbar-brand:hover {
+    color: white;
 }
 
 .nav-link {
+    color: #d5d8dc;
+    background-color: transparent;
+    transition-duration: 0.5s;
+}
+
+.nav-link:hover {
     color: white;
     background-color: transparent;
+}
+
+.navbar-toggler {
+    color: #d5d8dc;
+    border: 0.5px solid #d5d8dc;
+    background-color: #d5d8dc;
+}
+
+h5 {
+    color: #d5d8dc; 
+}
+
+h3 {
+    color: #d5d8dc;
 }
 
 /* Customizing table */
@@ -20,6 +45,7 @@ table {
     width: 70%;
     margin-left: auto;
     margin-right: auto;
+    color: #d5d8dc;
 }
 
 table th,
@@ -29,27 +55,9 @@ table td {
     vertical-align: middle;
 }
 
-tbody tr:nth-of-type(odd) {
-    background-color: rgb(232, 218, 239, 0.25)
-}
-
-.btn {
-    background-color: rgb(0,212,255, 0.75);
-    border-radius: 12px;
-    color: rgba(2,0,36,1);
-    border: 2px solid rgba(2,0,36,1);
-    transition-duration: 0.4s;
-}
-
-.btn:hover {
-    background-color: rgb(9,9,121);
-    color: white;
-    border: 2px solid rgb(9,9,121);
-}
-
 .high {
-    background-color: #eaecee;
-    border: 1px solid #eaecee;
+    background-color: #294661;
+    border: 1px solid #d5d8dc;
 }
 
 .scuba {
@@ -57,17 +65,91 @@ tbody tr:nth-of-type(odd) {
     border: 1px solid #d5d8dc;
 }
 
+/* button */
+.btn {
+    background-color: transparent;
+    border-radius: 5px;
+    color: #d5d8dc;
+    border: 0.5px solid #d5d8dc;
+    transition-duration: 0.5s;
+}
+
+.btn:hover {
+    background-color: #d5d8dc;
+    color: #1c2833;
+    border: 0.5px solid #d5d8dc;
+}
+
 body {
     font-family: 'Montserrat', sans-serif;  
-    background-color: #eaecee;
+    background-color:#1c2833;
 }
 
 #main_bar {
-    background: linear-gradient(270deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 20%, rgba(0,212,255,1) 100%);
+    background: #294661;
 }
 
 input {
-    border: 2px solid #1c2833;
+    background-color: #294661;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    color: #d5d8dc;
+    width: 200px;
+    height: 35px;
+}
+
+input:hover {
+    border: 1px solid #d5d8dc;
+}
+
+input::placeholder {
+    color: #d5d8dcc2;
+}
+
+.enroll {
+    width: 70px;
+    transition-duration: 0.5s;
+}
+
+.enroll:hover {
+    background-color: #d5d8dc;
+    color: #1c2833;
+    border: 0.5px solid #d5d8dc;
+}
+
+select {
+    background-color: transparent;
+    outline: none;
+    border: 0.5px solid #d5d8dc;
+    border-radius: 5px;
+    color: #d5d8dc;
+    width: 100px;
+    height: 35px;
+    transition-duration: 0.5s;
+}
+
+select:hover {
+    background-color: #d5d8dc;
+    color: #1c2833;
+    border: 0.5px solid #d5d8dc;
+}
+
+option {
+    color: #d5d8dc;
+    background-color: #1c2833;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#faculty_select {
+    background-color: transparent;
+    outline: none;
+    border: 0.5px solid #d5d8dc;
+    border-radius: 5px;
+    color: #d5d8dc;
+    width: 200px;
+    height: 35px;
 }
 
 #wallet {
@@ -79,9 +161,13 @@ input {
 footer {
     text-align: center;
     font-size: 90%;
-    color: #1c2833;
+    color: #d5d8dc;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: -1px;
     margin-top: 100px;
+}
+
+a {
+    color: #d5d8dc;
 }
