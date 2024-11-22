@@ -12,8 +12,8 @@
             <table>
                 <thead>
                     <tr class="high">
-                        <th>Name</th>
-                        <th>Faculty</th>
+                        <th>Name <input class="filter" type="text" id="filterName" placeholder="filter"></th>
+                        <th>Faculty <input class="filter" type="text" id="filterFaculty" placeholder="filter"></th>
                         <th>Semester</th>
                         <th>Year</th>
                         <th></th>
@@ -39,4 +39,30 @@
                 </tbody>
             </table>
     </div>
+
+    <script>
+        const filterName = document.getElementById('filterName');
+        const filterFaculty = document.getElementById('filterFaculty');
+        // ... otros elementos de filtro ...
+      
+        function filterTable() {
+          const rows = document.querySelectorAll('table tbody tr');
+          const nameFilter = filterName.value.toLowerCase();
+          const facultyFilter = filterFaculty.value.toLowerCase();
+      
+          rows.forEach(row => {
+            const nameCell = row.cells[0]; // Ajusta el índice si la columna de nombre no es la tercera
+            const facultyCell = row.cells[1]; // Ajusta el índice si la columna de facultad no es la cuarta
+            const nameMatch = nameCell.textContent.toLowerCase().includes(nameFilter);
+            const facultyMatch = facultyCell.textContent.toLowerCase().includes(facultyFilter);
+      
+            row.style.display = nameMatch && facultyMatch ? '' : 'none';
+          });
+        }
+      
+        // Asignar event listeners a todos los campos de filtro
+        filterName.addEventListener('keyup', filterTable);
+        filterFaculty.addEventListener('keyup', filterTable);
+        // ... otros event listeners ...
+    </script>
 {% endblock %}
