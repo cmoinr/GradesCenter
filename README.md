@@ -1,26 +1,26 @@
 # GradesCenter
-#### Video Demo  <URL HERE>
-#### Description
+### Video Demo  <URL HERE>
+### Description
 
 In my final CS50 project I decided to create a web application to manage student grades at a university. My purpose with this proposal will be to provide a practical, efficient and user-friendly solution when an educational institution (with the help of its teachers) needs to back up the grades of each of its students safely and in one place; in the same way, so that students have guaranteed access to the grades of their different subjects.
 
 All this was inspired by a problematic situation that occurs at my university every time the enrollment season and the beginning of the semester arrive: unfortunately, the system collapses due to the volume of active users and requests to the servers, causing displeasure in the student population and inconveniences related to registering for the required subjects according to the current period.
 
-#### In my web application I have used
+### In my web application I have used
 
-- **Flask**, to provide dynamism to my utility
+- **Flask**, to provide dynamism to my utility.
 
-- **SQL**, to create a database from scratch, analyzing all the elements necessary to save the information in the most efficient and orderly way possible
+- **SQL**, to create a database from scratch, analyzing all the elements necessary to save the information in the most efficient and orderly way possible.
 
-- **Python**, so that in alliance with Flask, I can structure the routes and the general operation of my app, and incorporate server-side validations that make its environment more robust
+- **Python**, so that in alliance with Flask, I can structure the routes and the general operation of my app, and incorporate server-side validations that make its environment more robust.
 
-- **HTML**, to structure each of the templates I have used and provide the information to the user in a clear way
+- **HTML**, to structure each of the templates I have used and provide the information to the user in a clear way.
 
-- **CSS**, to decorate and beautify the general interface of my application
+- **CSS**, to decorate and beautify the general interface of my application.
 
-- **JavaScript**, to make the user's experience more interactive when using the software, through buttons and various actions
+- **JavaScript**, to make the user's experience more interactive when using the software, through buttons and various actions.
 
-#### Files used in my project
+### Files used in my project
 
 - <ins>**app.py:**</ins> First, all the libraries needed for the project are imported (os, requests, sqlite3, re, cs50, flask, werkzeug.security). Then, the application is configured using Flask and the database is linked. Next, the routes (through functions) that my app will have are defined, as well as its logic and behavior according to the HTTP methods: "GET" and "POST", this derived from the user's behavior.
 
@@ -74,7 +74,7 @@ _It consists of 7 SQL tables:_
 
 - <ins>**logo.ico:**</ins> I designed this icon to further enhance the exterior finish of my interface.
 
-#### HTML templates
+### HTML templates
 
 - **layout:** This is the main template (design) of the app. The other templates are derived from this file thanks to the implementation of Jinja. It displays the main navigation bar and the footer.
 
