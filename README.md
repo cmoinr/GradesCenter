@@ -74,6 +74,8 @@ _It consists of 7 SQL tables:_
 
 - <ins>**logo.ico:**</ins> I designed this icon to further enhance the exterior finish of my interface.
 
+- <ins>**wsgi.py:**</ins> This file is the entry point for my application and contains the configuration needed for Gunicorn to run it. This because I connected it with Render.
+
 ### HTML templates
 
 - **layout:** This is the main template (design) of the app. The other templates are derived from this file thanks to the implementation of Jinja. It displays the main navigation bar and the footer.
