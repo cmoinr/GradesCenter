@@ -45,7 +45,7 @@ def index():
     else: 
         # Querying subjects that the teacher are teaching
         subjects = db.execute("""
-            SELECT subjects.id, subjects.name, faculty.field, subjects.semester
+            SELECT subjects.id, subjects.name, faculty.field, subjects.semester, subjects.year
             FROM subjects
             JOIN faculty ON subjects.id_faculty = faculty.id
             JOIN teaching ON subjects.id = teaching.id_subject
@@ -105,11 +105,12 @@ def grades():
 def student():
     # Student main page
     subjects = db.execute("""
-        SELECT subjects.name, subjects.semester, subjects.credits, grades.grade, teachers.names, teachers.surnames
-        FROM subjects
-        JOIN grades ON subjects.id = grades.id_subject
-        JOIN studying ON grades.id_student = studying.id_student
-        JOIN teaching ON subjects.id = teaching.id_subject
+        SELECT subjects.name, subjects.semester, subjects.year, subjects.credits, grades.grade, teachers.names, teachers.surnames
+        FROM studying
+        JOIN students ON studying.id_student = students.id
+        JOIN grades   ON studying.id_subject = grades.id_subject
+        JOIN subjects ON studying.id_subject = subjects.id
+        JOIN teaching ON studying.id_subject = teaching.id_subject
         JOIN teachers ON teaching.id_teacher = teachers.id
         WHERE studying.id_student = ?
     """, session["user_id"])
@@ -151,7 +152,7 @@ def add_subjects():
     else:   
             
         subjects_available = db.execute("""
-            SELECT subjects.id, subjects.name, subjects.semester, subjects.credits
+            SELECT subjects.id, subjects.name, subjects.semester, subjects.year, subjects.credits
             FROM subjects
             JOIN students ON subjects.id_faculty = students.id_faculty
             WHERE students.id = ?
@@ -236,8 +237,16 @@ def subjects():
             AND id_subject = ?
         """, session["user_id"], selected)
 
+        already = db.execute("""
+            SELECT id_subject
+            FROM teaching
+            WHERE id_subject = ?
+        """, selected)
+
         if len(teaching) == 1:
             return apology("registered subject", 400)
+        elif len(already) == 1:
+            return apology("another teacher already teachs this subject", 400)
         else:
             db.execute("""
                 INSERT INTO teaching (id_teacher, id_subject) 
@@ -249,7 +258,7 @@ def subjects():
     else:  
 
         subjects = db.execute("""
-            SELECT subjects.id, name, field, semester
+            SELECT subjects.id, name, field, semester, year
             FROM subjects 
             JOIN faculty ON subjects.id_faculty = faculty.id
         """)

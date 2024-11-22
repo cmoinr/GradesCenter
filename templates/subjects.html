@@ -15,6 +15,7 @@
                         <th>Name</th>
                         <th>Faculty</th>
                         <th>Semester</th>
+                        <th>Year</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -25,6 +26,7 @@
                             <td>{{ subject['name'] }}</td>
                             <td>{{ subject['field'] }}</td>
                             <td>{{ subject['semester'] }}</td>
+                            <td>{{ subject['year'] }}</td>
                             <td>
                                 <form action="/subjects" method="post">
                                     <input type="hidden" name="selected" value="{{ subject['id'] }}">

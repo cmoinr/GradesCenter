@@ -28,7 +28,8 @@ CREATE TABLE subjects (
     id TEXT NOT NULL,
     name TEXT NOT NULL,
     id_faculty TEXT NOT NULL,
-    semester INTEGER NOT NULL,
+    semester INTEGER,
+    year INTEGER,
     credits INTEGER NOT NULL,
     PRIMARY KEY(id)
     FOREIGN KEY(id_faculty) REFERENCES faculty(id)
