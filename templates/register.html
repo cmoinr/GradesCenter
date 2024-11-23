@@ -14,13 +14,13 @@
             </select>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="shaded-input" name="id" maxlength="8" placeholder="ID" type="text" pattern="[0-9]{8}">
+            <input autocomplete="off" class="shaded-input" name="id" minlength="7" maxlength="8" placeholder="ID" type="text">
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="shaded-input" name="names" placeholder="Names" type="text">
+            <input autocomplete="off" class="shaded-input" name="names" placeholder="Names" type="text" required>
         </div>
         <div class="mb-3">
-            <input autocomplete="off" class="shaded-input" name="surnames" placeholder="Surnames" type="text">
+            <input autocomplete="off" class="shaded-input" name="surnames" placeholder="Surnames" type="text" required>
         </div>
 
         <div class="mb-3" id="studentFields" style="display: none;">
