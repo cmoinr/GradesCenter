@@ -6,8 +6,8 @@
 
 {% block main %}
     <div class="mb-3">
-        <h5>Students taking this subject:</h5>
-        <h6>{{ subject_name[0]['name'] }}</h6>
+        <h5>This strategy's list of students:</h5>
+        <h6>{{ strategy_selected[0]['type'] }} about: "{{ strategy_selected[0]['topic'] }}" | {{ strategy_selected[0]['percentage'] }}% | {{ strategy_selected[0]['date'] }}</h6>
     </div>
     <div class="mb-3">
             <table>
@@ -16,7 +16,7 @@
                         <th>ID <input class="filter" type="text" id="filterID" placeholder="filter"></th>
                         <th>Names <input class="filter" type="text" id="filterName" placeholder="filter"></th>
                         <th>Surnames <input class="filter" type="text" id="filterSurname" placeholder="filter"></th>
-                        <th>Final Grade</th>
+                        <th>Grade</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -30,7 +30,7 @@
                             <td>{{ student['grade'] }}</td>
                             <td>                     
                                 <button class="btn btn-primary" type="button" onclick="showForm(this)">Edit</button>
-                                <form id="edit-form-{{ loop.index }}" style="display: none;" action="/grades" method="post">
+                                <form id="edit-form-{{ loop.index }}" style="display: none;" action="/strategies_grades" method="post">
                                     <input type="hidden" name="id_student" value="{{ student['id'] }}">
                                     <input class="grade_value" type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10" minlength="1">
                                     <input class="enroll" type="submit" value="Save">

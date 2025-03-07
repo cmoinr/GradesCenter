@@ -6,42 +6,55 @@
 
 {% block main %}
     <div class="mb-3">
-        <h5>Students taking this subject:</h5>
+        <h5>Strategies on this subject:</h5>
         <h6>{{ subject_name[0]['name'] }}</h6>
     </div>
     <div class="mb-3">
+            <button class="btn btn-primary" id="new_strategy" type="button" onclick="addStrategies()">Add New Strategy</button>
+            <form id="add_Strategies" style="display: none;" action="/strategies" method="post">
+                <input type="hidden" name="subject_id" value="{{ subject_name[0]['id'] }}">
+                <input type="text" name="type" placeholder="Type" required>
+                <input type="text" name="topic" placeholder="Topic" required>
+                <input type="number" name="percentage" placeholder="Percentage" min="0" max="100" required>
+                <input type="date" name="date" required>
+                <input class="btn" id="strategy_save" type="submit" value="Save">
+            </form>
+
             <table>
                 <thead>
                     <tr class="high">
-                        <th>ID <input class="filter" type="text" id="filterID" placeholder="filter"></th>
-                        <th>Names <input class="filter" type="text" id="filterName" placeholder="filter"></th>
-                        <th>Surnames <input class="filter" type="text" id="filterSurname" placeholder="filter"></th>
-                        <th>Final Grade</th>
-                        <th></th>
+                        <th>Type <input class="filter" type="text" id="filterID" placeholder="filter"></th>
+                        <th>Topic <input class="filter" type="text" id="filterName" placeholder="filter"></th>
+                        <th>%</th>
+                        <th>Date</th>
+                        <th>Grades</th>
                     </tr>
                 </thead>
                 <tbody>
 
-                    {% for student in list_students %}
+                    {% for strategy in list_strategies %}
                         <tr>
-                            <td>{{ student['id'] }}</td>
-                            <td>{{ student['names'] }}</td>
-                            <td>{{ student['last_names'] }}</td>
-                            <td>{{ student['grade'] }}</td>
-                            <td>                     
-                                <button class="btn btn-primary" type="button" onclick="showForm(this)">Edit</button>
-                                <form id="edit-form-{{ loop.index }}" style="display: none;" action="/grades" method="post">
-                                    <input type="hidden" name="id_student" value="{{ student['id'] }}">
-                                    <input class="grade_value" type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10" minlength="1">
-                                    <input class="enroll" type="submit" value="Save">
-                                </form>
+                            <td>{{ strategy['type'] }}</td>
+                            <td>{{ strategy['topic'] }}</td>
+                            <td>{{ strategy['percentage'] }}</td>
+                            <td>{{ strategy['date'] }}</td>
+                            <td>
+                                <form action="/strategies_grades" method="get">
+                                    <input class="enroll" type="hidden" name="strategy_id" value="{{ strategy['id'] }}">
+                                    <input class="enroll" type="submit" value="View">
+                                </form>                    
                             </td>
                         </tr>
                     {% endfor %}
 
                 </tbody>
             </table>
+
             <script>
+                function addStrategies() {
+                    document.getElementById("add_Strategies").style.display = "block";
+                }
+
                 function showForm(button) {
                   // Obtener el índice de la fila (asumiendo que los botones tienen la misma estructura)
                   var rowIndex = button.parentNode.parentNode.rowIndex;
@@ -86,4 +99,5 @@
         filterSurname.addEventListener('keyup', filterTable);
         // ... otros event listeners ...
     </script>
+
 {% endblock %}

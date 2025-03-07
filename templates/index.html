@@ -6,7 +6,7 @@
 
 {% block main %}
     <div class="mb-3">
-        <h5>Welcome, {{ instructor[0]['names'] }} {{ instructor[0]['surnames'] }}</h5>
+        <h5>Welcome, {{ instructor[0]['names'] }} {{ instructor[0]['last_names'] }}</h5>
         <h3>I'm teaching...</h3>
     </div>
     <div class="mb-3">
@@ -16,6 +16,7 @@
                     <th>Name</th>
                     <th>Faculty</th>
                     <th>Semester</th>
+                    <th>Strategies</th>
                     <th>Students</th>
                 </tr>
             </thead>
@@ -26,6 +27,12 @@
                         <td>{{ subject['name'] }}</td>
                         <td>{{ subject['field'] }}</td>
                         <td>{{ subject['semester'] }}</td>
+                        <td>
+                            <form action="/" method="post">
+                                <input class="enroll" type="hidden" name="strategy" value="{{ subject['id'] }}">
+                                <input class="enroll" type="submit" value="View">
+                            </form>
+                        </td>
                         <td>
                             <form action="/" method="post">
                                 <input class="enroll" type="hidden" name="check" value="{{ subject['id'] }}">

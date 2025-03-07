@@ -218,3 +218,16 @@ footer {
 a {
     color: #d5d8dc;
 }
+
+#new_strategy {
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+#add_Strategies {
+    margin-bottom: 30px;
+}
+
+#strategy_save {
+    width: auto;
+}
