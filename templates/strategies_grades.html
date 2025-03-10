@@ -24,14 +24,15 @@
 
                     {% for student in list_students %}
                         <tr>
-                            <td>{{ student['id'] }}</td>
+                            <td>{{ student['student_id'] }}</td>
                             <td>{{ student['names'] }}</td>
                             <td>{{ student['last_names'] }}</td>
                             <td>{{ student['grade'] }}</td>
                             <td>                     
                                 <button class="btn btn-primary" type="button" onclick="showForm(this)">Edit</button>
                                 <form id="edit-form-{{ loop.index }}" style="display: none;" action="/strategies_grades" method="post">
-                                    <input type="hidden" name="id_student" value="{{ student['id'] }}">
+                                    <input type="hidden" name="student_id" value="{{ student['student_id'] }}">
+                                    <input type="hidden" name="strategy_id" value="{{ student['strategy_id'] }}">
                                     <input class="grade_value" type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10" minlength="1">
                                     <input class="enroll" type="submit" value="Save">
                                 </form>

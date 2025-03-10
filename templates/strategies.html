@@ -28,6 +28,7 @@
                         <th>%</th>
                         <th>Date</th>
                         <th>Grades</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,6 +45,17 @@
                                     <input class="enroll" type="submit" value="View">
                                 </form>                    
                             </td>
+                            <td>
+                                <button class="btn btn-primary" type="button" onclick="editStrategies(this)">Edit</button>
+                                <form id="edit_Strategies" style="display: none;" action="/strategies" method="post">
+                                    <input id="edit_strategy_form" type="hidden" name="editing_strategy_id" value="{{ strategy['id'] }}">
+                                    <input id="edit_strategy_form" type="text" name="editing_type" placeholder="{{ strategy['type'] }}" required>
+                                    <input id="edit_strategy_form" type="text" name="editing_topic" placeholder="{{ strategy['topic'] }}" required>
+                                    <input id="edit_strategy_form" type="number" name="editing_percentage" placeholder="{{ strategy['percentage'] }}" min="0" max="100" required>
+                                    <input id="edit_strategy_form" type="date" name="editing_date" required>
+                                    <input class="btn" id="strategy_save2" type="submit" value="Save">
+                                </form>
+                            </td>
                         </tr>
                     {% endfor %}
 
@@ -55,15 +67,13 @@
                     document.getElementById("add_Strategies").style.display = "block";
                 }
 
-                function showForm(button) {
-                  // Obtener el índice de la fila (asumiendo que los botones tienen la misma estructura)
-                  var rowIndex = button.parentNode.parentNode.rowIndex;
-                  
-                  // Obtener el ID del formulario
-                  var formId = "edit-form-" + rowIndex;
-    
-                  // Mostrar el formulario
-                  document.getElementById(formId).style.display = "block";
+                function editStrategies(button) {
+                    // Ocultar el botón
+                    button.style.display = "none";
+                    
+                    // Mostrar el formulario
+                    var form = button.nextElementSibling;
+                    form.style.display = "block";
                 }
             </script>
     </div>

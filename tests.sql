@@ -1,9 +1,11 @@
--- SELECT subjects.name, faculty.field, subjects.semester
--- FROM subjects
--- JOIN faculty ON subjects.id_faculty = faculty.id
--- JOIN teaching ON subjects.id = teaching.id_subject
--- JOIN teachers ON teaching.id_teacher = teachers.id
--- WHERE teaching.id_teacher = 29959129
+SELECT s.id, s.name, d.field, s.semester, COUNT(studying.student_id) AS 'enrolled'
+FROM subjects s
+JOIN departments d ON s.department_id = d.id
+JOIN teaching t ON s.id = t.subject_id
+JOIN teachers ts ON t.teacher_id = ts.id
+JOIN studying ON s.id = studying.subject_id
+WHERE t.teacher_id = ?
+GROUP BY s.id;
 
 -- SELECT id, names, surnames, semester FROM students
 -- JOIN studying ON students.id = studying.id_student
@@ -51,3 +53,21 @@
 -- JOIN teaching ON studying.subject_id = teaching.subject_id
 -- JOIN teachers ON teaching.teacher_id = teachers.id
 -- WHERE studying.student_id = ?
+
+-- ALTER TABLE evaluated
+-- ADD COLUMN grade INTEGER;
+
+-- ALTER TABLE studying, teaching
+-- ADD COLUMN section TEXT;
+
+-- INSERT INTO evaluated (strategy_id, student_id)
+-- SELECT 5, students.id
+-- FROM studying
+-- JOIN grades ON studying.student_id = grades.student_id AND studying.subject_id = grades.subject_id
+-- JOIN students ON studying.student_id = students.id
+-- WHERE studying.subject_id = 'LM002'
+
+-- SELECT evaluated.student_id, students.names, students.last_names, evaluated.grade
+-- FROM evaluated
+-- JOIN students ON evaluated.student_id = students.id
+-- WHERE evaluated.strategy_id = ?

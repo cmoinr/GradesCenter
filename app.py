@@ -1,7 +1,7 @@
 import os, requests, sqlite3, re, datetime, pytz
 
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, url_for, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -34,6 +34,7 @@ def after_request(response):
     
     return response
 
+# aplicar logic para section / implementar promedio
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
@@ -54,12 +55,14 @@ def index():
     else: 
         # Querying subjects that the teacher are teaching
         subjects = db.execute("""
-            SELECT s.id, s.name, d.field, s.semester
+            SELECT s.id, s.name, d.field, s.semester, COUNT(studying.student_id) AS 'enrolled'
             FROM subjects s
             JOIN departments d ON s.department_id = d.id
             JOIN teaching t ON s.id = t.subject_id
             JOIN teachers ts ON t.teacher_id = ts.id
+            JOIN studying ON s.id = studying.subject_id
             WHERE t.teacher_id = ?
+            GROUP BY s.id
         """, session["user_id"])
 
         # Querying subject's name
@@ -114,20 +117,54 @@ def grades():
 def strategies():
     # List of students who are studying the selected subject
     if request.method == "POST":
-        # Getting the info provided by a teacher
-        subject_id = request.form.get("subject_id")
-        type = request.form.get("type")
-        topic = request.form.get("topic")
-        percentage = request.form.get("percentage")
-        date = request.form.get("date")
+        editing = request.form.get("editing_strategy_id")
+        if not editing:
+            # Getting the info provided by a teacher
+            subject_id = request.form.get("subject_id")
+            type = request.form.get("type")
+            topic = request.form.get("topic")
+            percentage = request.form.get("percentage")
+            date = request.form.get("date")
 
-        if not subject_id or not type or not topic or not percentage or not date:
-            return apology("incomplete data error", 400)
+            if not subject_id or not type or not topic or not percentage or not date:
+                return apology("incomplete data error", 400)
 
-        db.execute("""
-            INSERT INTO strategies (type, topic, percentage, subject_id, teacher_id, date)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, type, topic, percentage, subject_id, session["user_id"], date)
+            db.execute("""
+                INSERT INTO strategies (type, topic, percentage, subject_id, teacher_id, date)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, type, topic, percentage, subject_id, session["user_id"], date)
+
+            id_key = db.execute("""
+                SELECT id FROM strategies 
+                WHERE type = ?
+                AND topic = ?
+                AND subject_id = ?
+                AND teacher_id = ?
+                AND date = ?
+            """, type, topic, subject_id, session["user_id"], date)
+
+            db.execute("""
+                INSERT INTO evaluated (strategy_id, student_id)
+                SELECT ?, students.id
+                FROM studying
+                JOIN grades ON studying.student_id = grades.student_id AND studying.subject_id = grades.subject_id
+                JOIN students ON studying.student_id = students.id
+                WHERE studying.subject_id = ?
+            """, id_key[0]['id'], subject_id)
+        else:
+            type = request.form.get("editing_type")
+            topic = request.form.get("editing_topic")
+            percentage = request.form.get("editing_percentage")
+            date = request.form.get("editing_date")
+
+            if not type or not topic or not percentage or not date:
+                return apology("incomplete data error", 400)
+            
+            db.execute("""
+                UPDATE strategies SET type = ?, topic = ?, percentage = ?, date = ?
+                WHERE id = ?
+            """, type, topic, percentage, date, editing)
+        
 
         return redirect("/strategies")
     
@@ -151,27 +188,45 @@ def strategies():
 def strategies_grades():
     # Changing a specific strategy grade
     if request.method == "POST":
-        print("strategies_grades")
+        # Getting the strategy's grade provided by a teacher
+        grade = request.form.get("grade")
+        student_id = request.form.get("student_id")
+        strtgy_id = request.form.get("strategy_id")
 
-        return redirect("/strategies_grades")
+        if not student_id or not grade:
+            return apology("incomplete data error", 400)
+        
+        if int(grade) >= 0 or int(grade) <= 10:
+            db.execute("""
+                UPDATE evaluated SET grade = ?
+                WHERE strategy_id = ?
+                AND student_id = ?
+            """, int(grade), strtgy_id, student_id)
+        else:
+            return apology("wrong data error", 400)
+
+        return redirect(url_for("strategies_grades"))
     
     else:  
-        # List of students who must take this strategy
-        strategy_id = int(request.args.get("strategy_id"))
+        strategy_id = request.args.get("strategy_id")
+        if strategy_id:
+            session["strategy_id"] = strategy_id
+        else:
+            strategy_id = session.get("strategy_id")
 
+        # List of students who must take this strategy
         list_students = db.execute("""
-            SELECT students.id, students.names, students.last_names, grades.grade
-            FROM studying
-            JOIN grades ON studying.student_id = grades.student_id AND studying.subject_id = grades.subject_id
-            JOIN students ON studying.student_id = students.id
-            WHERE studying.subject_id = ?
-        """, session.get("subject_strategy"))
+            SELECT evaluated.strategy_id, evaluated.student_id, students.names, students.last_names, evaluated.grade
+            FROM evaluated
+            JOIN students ON evaluated.student_id = students.id
+            WHERE evaluated.strategy_id = ?
+        """, session.get("strategy_id"))
 
         strategy_selected = db.execute("""
             SELECT type, topic, percentage, date
             FROM strategies
             WHERE id = ?
-        """, strategy_id)
+        """, session.get("strategy_id"))
 
         return render_template("strategies_grades.html", list_students=list_students, strategy_selected=strategy_selected)
 

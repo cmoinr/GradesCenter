@@ -16,6 +16,8 @@
                     <th>Name</th>
                     <th>Faculty</th>
                     <th>Semester</th>
+                    <th>Section</th>
+                    <th>Enrolled</th>
                     <th>Strategies</th>
                     <th>Students</th>
                 </tr>
@@ -27,6 +29,8 @@
                         <td>{{ subject['name'] }}</td>
                         <td>{{ subject['field'] }}</td>
                         <td>{{ subject['semester'] }}</td>
+                        <td></td>
+                        <td>{{ subject['enrolled'] }}</td>
                         <td>
                             <form action="/" method="post">
                                 <input class="enroll" type="hidden" name="strategy" value="{{ subject['id'] }}">
