@@ -7,7 +7,7 @@
 {% block main %}
     <div class="mb-3">
         <h5>Students taking this subject:</h5>
-        <h6>{{ subject_name[0]['name'] }}</h6>
+        <h6>{{ subject_name[0]['name'] }} - Section {{ subject_name[0]['section_number'] }}</h6>
     </div>
     <div class="mb-3">
             <table>
@@ -31,7 +31,7 @@
                             <td>                     
                                 <button class="btn btn-primary" type="button" onclick="showForm(this)">Edit</button>
                                 <form id="edit-form-{{ loop.index }}" style="display: none;" action="/grades" method="post">
-                                    <input type="hidden" name="id_student" value="{{ student['id'] }}">
+                                    <input type="hidden" name="student_id" value="{{ student['id'] }}">
                                     <input class="grade_value" type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10" minlength="1">
                                     <input class="enroll" type="submit" value="Save">
                                 </form>

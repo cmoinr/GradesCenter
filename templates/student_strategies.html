@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Subject strategies
+{% endblock %}
+
+{% block main %}
+    <div class="mb-3">
+        <h5>Strategies on this subject:</h5>
+        <h6>{{ info_subject[0] }} - Section {{ info_subject[1] }} | Taught by {{ info_subject[2] }}</h6>
+    </div>
+    <div class="mb-3">
+        <table>
+            <thead>
+                <tr class="high">
+                    <th>Type</th>
+                    <th>Topic</th>
+                    <th>%</th>
+                    <th>Date</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for strategy in list_strategies %}
+                    <tr>
+                        <td>{{ strategy['type'] }}</td>
+                        <td>{{ strategy['topic'] }}</td>
+                        <td class="percentage">{{ strategy['percentage'] }}</td>
+                        <td>{{ strategy['date'] }}</td>
+                        <td class="grade">{{ strategy['grade'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mb-3">
+        <h6>Final Grade: <span id="final-grade">0</span></h6>
+    </div>
+    <script>
+        function calculateFinalGrade() {
+            const rows = document.querySelectorAll('table tbody tr');
+            let finalGrade = 0;
+
+            rows.forEach(row => {
+                const percentage = parseFloat(row.querySelector('.percentage').textContent) || 0;
+                const grade = parseFloat(row.querySelector('.grade').textContent) || 0;
+                finalGrade += (percentage / 100) * grade;
+            });
+
+            document.getElementById('final-grade').textContent = finalGrade.toFixed(2); // Mostrar con 2 decimales
+        }
+
+        // Calcular la nota final al cargar la página
+        document.addEventListener('DOMContentLoaded', calculateFinalGrade);
+    </script>
+{% endblock %}

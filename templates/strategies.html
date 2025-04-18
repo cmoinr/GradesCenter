@@ -7,12 +7,12 @@
 {% block main %}
     <div class="mb-3">
         <h5>Strategies on this subject:</h5>
-        <h6>{{ subject_name[0]['name'] }}</h6>
+        <h6>{{ section_name[0]['name'] }} - Section {{ section_name[0]['section_number'] }}</h6>
     </div>
     <div class="mb-3">
             <button class="btn btn-primary" id="new_strategy" type="button" onclick="addStrategies()">Add New Strategy</button>
             <form id="add_Strategies" style="display: none;" action="/strategies" method="post">
-                <input type="hidden" name="subject_id" value="{{ subject_name[0]['id'] }}">
+                <input type="hidden" name="section_id" value="{{ section_name[0]['id'] }}">
                 <input type="text" name="type" placeholder="Type" required>
                 <input type="text" name="topic" placeholder="Topic" required>
                 <input type="number" name="percentage" placeholder="Percentage" min="0" max="100" required>
@@ -49,10 +49,10 @@
                                 <button class="btn btn-primary" type="button" onclick="editStrategies(this)">Edit</button>
                                 <form id="edit_Strategies" style="display: none;" action="/strategies" method="post">
                                     <input id="edit_strategy_form" type="hidden" name="editing_strategy_id" value="{{ strategy['id'] }}">
-                                    <input id="edit_strategy_form" type="text" name="editing_type" placeholder="{{ strategy['type'] }}" required>
-                                    <input id="edit_strategy_form" type="text" name="editing_topic" placeholder="{{ strategy['topic'] }}" required>
-                                    <input id="edit_strategy_form" type="number" name="editing_percentage" placeholder="{{ strategy['percentage'] }}" min="0" max="100" required>
-                                    <input id="edit_strategy_form" type="date" name="editing_date" required>
+                                    <input id="edit_strategy_form" type="text" name="editing_type" value="{{ strategy['type'] }}" required>
+                                    <input id="edit_strategy_form" type="text" name="editing_topic" value="{{ strategy['topic'] }}" required>
+                                    <input id="edit_strategy_form" type="number" name="editing_percentage" value="{{ strategy['percentage'] }}" min="0" max="100" required>
+                                    <input id="edit_strategy_form" type="date" name="editing_date" value="{{ strategy['date'] }}" required>
                                     <input class="btn" id="strategy_save2" type="submit" value="Save">
                                 </form>
                             </td>
@@ -64,6 +64,23 @@
 
             <script>
                 function addStrategies() {
+                    // Obtener todos los porcentajes actuales de la tabla
+                    const rows = document.querySelectorAll('table tbody tr');
+                    let totalPercentage = 0;
+
+                    rows.forEach(row => {
+                        const percentageCell = row.cells[2]; // Índice de la columna de porcentaje
+                        const percentageValue = parseFloat(percentageCell.textContent) || 0;
+                        totalPercentage += percentageValue;
+                    });
+
+                    // Verificar si la suma de los porcentajes supera el 100
+                    if (totalPercentage >= 100) {
+                        alert("No se pueden agregar más estrategias. La suma de los porcentajes ya alcanza el 100%.");
+                        return;
+                    }
+
+                    // Mostrar el formulario si la suma es válida
                     document.getElementById("add_Strategies").style.display = "block";
                 }
 
@@ -74,7 +91,73 @@
                     // Mostrar el formulario
                     var form = button.nextElementSibling;
                     form.style.display = "block";
+
+                    // Asignar validación al formulario de edición
+                    form.addEventListener("submit", function(event) {
+                        if (!validateEditPercentageInput(form)) {
+                            event.preventDefault(); // Detener el envío del formulario
+                        }
+                    });
                 }
+
+                function validatePercentageInput() {
+                    // Obtener el valor del nuevo porcentaje ingresado
+                    const newPercentage = parseFloat(document.querySelector('input[name="percentage"]').value) || 0;
+
+                    // Obtener todos los porcentajes actuales de la tabla
+                    const rows = document.querySelectorAll('table tbody tr');
+                    let totalPercentage = newPercentage;
+
+                    rows.forEach(row => {
+                        const percentageCell = row.cells[2]; // Índice de la columna de porcentaje
+                        const percentageValue = parseFloat(percentageCell.textContent) || 0;
+                        totalPercentage += percentageValue;
+                    });
+
+                    // Verificar si la suma de los porcentajes supera el 100
+                    if (totalPercentage > 100) {
+                        alert("El porcentaje total no puede superar el 100%. Ajuste los valores.");
+                        return false; // Evitar el envío del formulario
+                    }
+
+                    return true; // Permitir el envío del formulario
+                }
+
+                function validateEditPercentageInput(form) {
+                    // Obtener el valor del porcentaje editado
+                    const editedPercentage = parseFloat(form.querySelector('input[name="editing_percentage"]').value) || 0;
+                    const strategyId = form.querySelector('input[name="editing_strategy_id"]').value;
+
+                    // Obtener todos los porcentajes actuales de la tabla
+                    const rows = document.querySelectorAll('table tbody tr');
+                    let totalPercentage = editedPercentage;
+
+                    rows.forEach(row => {
+                        const percentageCell = row.cells[2]; // Índice de la columna de porcentaje
+                        const percentageValue = parseFloat(percentageCell.textContent) || 0;
+                        const rowStrategyId = row.querySelector('input[name="strategy_id"]')?.value;
+
+                        // Excluir el porcentaje de la estrategia que se está editando
+                        if (rowStrategyId !== strategyId) {
+                            totalPercentage += percentageValue;
+                        }
+                    });
+
+                    // Verificar si la suma de los porcentajes supera el 100
+                    if (totalPercentage > 100) {
+                        alert("El porcentaje total no puede superar el 100%. Ajuste los valores.");
+                        return false; // Evitar el envío del formulario
+                    }
+
+                    return true; // Permitir el envío del formulario
+                }
+
+                // Asignar la validación al formulario de agregar estrategias
+                document.getElementById("add_Strategies").addEventListener("submit", function(event) {
+                    if (!validatePercentageInput()) {
+                        event.preventDefault(); // Detener el envío del formulario
+                    }
+                });
             </script>
     </div>
 

@@ -25,6 +25,26 @@ def obtener_fecha_venezuela():
     fecha_venezuela = fecha_utc.replace(tzinfo=pytz.utc).astimezone(zona_horaria_venezuela)
     return fecha_venezuela.strftime('%Y-%m-%d')
 
+
+def obtener_trimestre_actual():
+    """Retorna una fecha en formato 'YYYY-T', donde T es el trimestre actual."""
+    fecha_actual = obtener_fecha_venezuela()
+    año = fecha_actual[0:4]
+    mes = int(fecha_actual[5:7])
+
+    # Determinar el trimestre basado en el mes
+    if 1 <= mes <= 3:
+        trimestre = 1
+    elif 4 <= mes <= 6:
+        trimestre = 2
+    elif 7 <= mes <= 9:
+        trimestre = 3
+    else:
+        trimestre = 4
+
+    return f"{año}-{trimestre}"
+
+
 @app.after_request
 def after_request(response):
     # Ensure responses aren't cached
@@ -34,6 +54,7 @@ def after_request(response):
     
     return response
 
+
 # aplicar logic para section / implementar promedio
 @app.route("/", methods=["GET", "POST"])
 @login_required
@@ -41,34 +62,41 @@ def index():
     # Teacher main page
     if request.method == "POST":
         # Redirect to selected subject's list of students
-        selected_subject = request.form.get("check")
-        subject_strategy = request.form.get("strategy")
+        selected_section = request.form.get("check")
+        section_strategy = request.form.get("strategy")
 
-        if selected_subject:
-            session["selected_subject"] = selected_subject
+        if selected_section:
+            session["selected_section"] = selected_section
 
             return redirect("/grades")
         else:
-            session["subject_strategy"] = subject_strategy
+            session["section_strategy"] = section_strategy
 
             return redirect("/strategies")
     else: 
         # Querying subjects that the teacher are teaching
-        subjects = db.execute("""
-            SELECT s.id, s.name, d.field, s.semester, COUNT(studying.student_id) AS 'enrolled'
-            FROM subjects s
-            JOIN departments d ON s.department_id = d.id
-            JOIN teaching t ON s.id = t.subject_id
-            JOIN teachers ts ON t.teacher_id = ts.id
-            JOIN studying ON s.id = studying.subject_id
-            WHERE t.teacher_id = ?
-            GROUP BY s.id
+        sections = db.execute("""
+            SELECT
+                sections.period,
+                sections.id, 
+                subjects.name, 
+                sections.section_number, 
+                departments.field, 
+                subjects.semester, 
+                COUNT(studying.student_id) AS 'enrolled'
+            FROM teaching
+            JOIN sections ON teaching.section_id = sections.id
+            JOIN subjects ON sections.subject_id = subjects.id
+            JOIN departments ON subjects.department_id = departments.id
+            LEFT JOIN studying ON teaching.section_id = studying.section_id
+            WHERE teaching.teacher_id = ?
+            GROUP BY teaching.section_id
         """, session["user_id"])
 
-        # Querying subject's name
+        # Querying teacher's name
         instructor = db.execute("SELECT names, last_names FROM teachers WHERE id = ?", session["user_id"])
 
-        return render_template("index.html", subjects=subjects, instructor=instructor)
+        return render_template("index.html", sections=sections, instructor=instructor)
 
 
 @app.route("/grades", methods=["GET", "POST"])
@@ -78,18 +106,18 @@ def grades():
     if request.method == "POST":
         # Getting the grade provided by a teacher
         grade = request.form.get("grade")
-        id_student = request.form.get("id_student")
-        id_subject = session.get("selected_subject")
+        student_id = request.form.get("student_id")
+        section_id = session.get("selected_section")
 
-        if not id_student or not grade:
+        if not student_id or not grade:
             return apology("incomplete data error", 400)
         
         if int(grade) >= 0 or int(grade) <= 10:
             db.execute("""
                 UPDATE grades SET grade = ?, teacher_id = ?, date = ? 
                 WHERE student_id = ?
-                AND subject_id = ?
-            """, int(grade), session["user_id"], obtener_fecha_venezuela(), id_student, id_subject)
+                AND section_id = ?
+            """, int(grade), session["user_id"], obtener_fecha_venezuela(), student_id, section_id)
         else:
             return apology("wrong data error", 400)
 
@@ -100,14 +128,17 @@ def grades():
         list_students = db.execute("""
             SELECT students.id, students.names, students.last_names, grades.grade
             FROM studying
-            JOIN grades ON studying.student_id = grades.student_id AND studying.subject_id = grades.subject_id
+            JOIN grades ON studying.student_id = grades.student_id AND studying.section_id = grades.section_id
             JOIN students ON studying.student_id = students.id
-            WHERE studying.subject_id = ?
-        """, session.get("selected_subject"))
+            WHERE studying.section_id = ?
+        """, session.get("selected_section"))
 
         subject_name = db.execute("""
-            SELECT name FROM subjects WHERE id = ?
-        """, session.get("selected_subject"))
+            SELECT subjects.name, sections.section_number
+            FROM sections 
+            JOIN subjects ON sections.subject_id = subjects.id            
+            WHERE sections.id = ?
+        """, session.get("selected_section"))
 
         return render_template("grades.html", list_students=list_students, subject_name=subject_name)
     
@@ -120,37 +151,37 @@ def strategies():
         editing = request.form.get("editing_strategy_id")
         if not editing:
             # Getting the info provided by a teacher
-            subject_id = request.form.get("subject_id")
+            section_id = request.form.get("section_id")
             type = request.form.get("type")
             topic = request.form.get("topic")
             percentage = request.form.get("percentage")
             date = request.form.get("date")
 
-            if not subject_id or not type or not topic or not percentage or not date:
+            if not section_id or not type or not topic or not percentage or not date:
                 return apology("incomplete data error", 400)
 
             db.execute("""
-                INSERT INTO strategies (type, topic, percentage, subject_id, teacher_id, date)
+                INSERT INTO strategies (type, topic, percentage, section_id, teacher_id, date)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, type, topic, percentage, subject_id, session["user_id"], date)
+            """, type, topic, percentage, section_id, session["user_id"], date)
 
             id_key = db.execute("""
                 SELECT id FROM strategies 
                 WHERE type = ?
                 AND topic = ?
-                AND subject_id = ?
+                AND section_id = ?
                 AND teacher_id = ?
                 AND date = ?
-            """, type, topic, subject_id, session["user_id"], date)
+            """, type, topic, section_id, session["user_id"], date)
 
             db.execute("""
                 INSERT INTO evaluated (strategy_id, student_id)
                 SELECT ?, students.id
                 FROM studying
-                JOIN grades ON studying.student_id = grades.student_id AND studying.subject_id = grades.subject_id
+                JOIN grades ON studying.student_id = grades.student_id AND studying.section_id = grades.section_id
                 JOIN students ON studying.student_id = students.id
-                WHERE studying.subject_id = ?
-            """, id_key[0]['id'], subject_id)
+                WHERE studying.section_id = ?
+            """, id_key[0]['id'], section_id)
         else:
             type = request.form.get("editing_type")
             topic = request.form.get("editing_topic")
@@ -169,18 +200,22 @@ def strategies():
         return redirect("/strategies")
     
     else:  
-        # List of students
+        # List of strategies
         list_strategies = db.execute("""
             SELECT id, type, topic, percentage, date
             FROM strategies
-            WHERE subject_id = ? AND teacher_id = ?
-        """, session.get("subject_strategy"), session["user_id"])
+            WHERE section_id = ?
+            AND teacher_id = ?
+        """, session.get("section_strategy"), session["user_id"])
 
-        subject_name = db.execute("""
-            SELECT id, name FROM subjects WHERE id = ?
-        """, session.get("subject_strategy"))
+        section_name = db.execute("""
+            SELECT sections.id, subjects.name, sections.section_number
+            FROM sections
+            JOIN subjects ON sections.subject_id = subjects.id            
+            WHERE sections.id = ?
+        """, session.get("section_strategy"))
 
-        return render_template("strategies.html", list_strategies=list_strategies, subject_name=subject_name)
+        return render_template("strategies.html", list_strategies=list_strategies, section_name=section_name)
 
 
 @app.route("/strategies_grades", methods=["GET", "POST"])
@@ -230,26 +265,57 @@ def strategies_grades():
 
         return render_template("strategies_grades.html", list_students=list_students, strategy_selected=strategy_selected)
 
-@app.route("/student")
+
+@app.route("/student", methods=["GET", "POST"])
 @login_required
 def student():
-    # Student main page
-    subjects = db.execute("""
-        SELECT subjects.name, subjects.semester, subjects.credits, grades.grade, teachers.names, teachers.last_names
-        FROM studying
-        JOIN subjects ON studying.subject_id = subjects.id
-        JOIN grades ON studying.student_id = grades.student_id AND studying.subject_id = grades.subject_id
-        JOIN teaching ON studying.subject_id = teaching.subject_id
-        JOIN teachers ON teaching.teacher_id = teachers.id
-        WHERE studying.student_id = ?
-    """, session["user_id"])
+    if request.method == "POST":
+        # Redirect to selected subject's list of students
+        session["selected_section_student"] = request.form.get("check")
+        session["selected_subject_name"] = request.form.get("subject_name")
+        session["selected_subject_section"] = request.form.get("subject_section")
+        session["selected_subject_teacher"] = request.form.get("subject_teacher")
+        
+        return redirect("/student_strategies")
+    else:
+        # Student main page
+        subjects = db.execute("""
+            SELECT subjects.name, subjects.semester, subjects.credits, grades.grade, teachers.names, teachers.last_names, sections.section_number, sections.period, sections.id
+            FROM studying
+            JOIN sections ON studying.section_id = sections.id 
+            JOIN subjects ON sections.subject_id = subjects.id
+            JOIN grades ON studying.student_id = grades.student_id AND studying.section_id = grades.section_id
+            JOIN teaching ON studying.section_id = teaching.section_id
+            JOIN teachers ON teaching.teacher_id = teachers.id
+            WHERE studying.student_id = ?
+        """, session["user_id"])
 
-    learner = db.execute("""
-        SELECT names, last_names FROM students WHERE id = ?
-    """, session["user_id"])
+        learner = db.execute("""
+            SELECT names, last_names FROM students WHERE id = ?
+        """, session["user_id"])
 
-    return render_template("student.html", subjects=subjects, learner=learner)
+        return render_template("student.html", subjects=subjects, learner=learner)
 
+
+@app.route("/student_strategies", methods=["GET", "POST"])
+@login_required
+def student_strategies():
+    if request.method == "POST":       
+        return redirect("/student_strategies")
+    else:
+        # List of strategies this student must take
+        list_strategies = db.execute("""
+            SELECT strategies.type, strategies.topic, strategies.percentage, strategies.date, evaluated.grade
+            FROM evaluated
+            JOIN strategies ON evaluated.strategy_id = strategies.id
+            WHERE evaluated.student_id = ?
+            AND strategies.section_id = ?
+        """, session["user_id"], session.get("selected_section_student"))
+
+        info_subject = [session.get("selected_subject_name"), session.get("selected_subject_section"), session.get("selected_subject_teacher"), session.get("selected_section_student")]
+
+        return render_template("student_strategies.html", list_strategies=list_strategies, info_subject=info_subject)
+    
 
 @app.route("/add_subjects", methods=["GET", "POST"])
 @login_required
@@ -257,21 +323,32 @@ def add_subjects():
     if request.method == "POST":
 
         adding = request.form.get("selected")
+        section = request.form.get("selected_section")
+
+        if not section:
+            return apology("no section selected", 400)
 
         # Checking if there's a teacher teaching that subject
         teaching = db.execute("""
-            SELECT teacher_id
-            FROM teaching
-            WHERE subject_id = ?     
-        """, adding)
+            SELECT sections.id, teaching.teacher_id
+            FROM sections
+            JOIN teaching ON sections.id = teaching.section_id
+            WHERE sections.subject_id = ?    
+            AND sections.section_number = ?
+            AND sections.period = ?
+        """, adding, section, obtener_trimestre_actual())
 
         # Checking if student already enrolled the subject
         subjects = db.execute("""
-            SELECT subject_id
-            FROM studying
-            WHERE student_id = ?
-            AND subject_id = ?
-        """, session["user_id"], adding)
+            SELECT studying.student_id
+            FROM sections
+            JOIN studying ON sections.id = studying.section_id
+            WHERE sections.subject_id = ?
+            AND sections.period = ?
+            AND studying.student_id = ?
+        """, adding, obtener_trimestre_actual(), session["user_id"])
+
+        # Checking if a section is already full
 
         if len(teaching) == 0:
             return apology("there's no teacher yet", 400)
@@ -279,12 +356,12 @@ def add_subjects():
             return apology("registered subject", 400)
         else:
             db.execute("""
-                INSERT INTO studying (student_id, subject_id) VALUES (?, ?)
-            """, session["user_id"], adding)
+                INSERT INTO studying (student_id, section_id) VALUES (?, ?)
+            """, session["user_id"], teaching[0]["id"])
 
             db.execute("""
-                INSERT INTO grades (student_id, subject_id, grade, teacher_id) VALUES (?, ?, ?, ?)
-            """, session["user_id"], adding, 0, teaching[0]["teacher_id"])
+                INSERT INTO grades (student_id, section_id, grade, teacher_id) VALUES (?, ?, ?, ?)
+            """, session["user_id"], teaching[0]["id"], 0, teaching[0]["teacher_id"])
             
             flash("Subject added!", "success")
             return redirect("/student")
@@ -292,11 +369,20 @@ def add_subjects():
     else:   
             
         subjects_available = db.execute("""
-            SELECT subjects.id, subjects.name, subjects.semester, subjects.credits
+            SELECT subjects.id, subjects.name, subjects.semester, subjects.credits, subjects.sections
             FROM subjects
             JOIN students ON subjects.department_id = students.department_id
             WHERE students.id = ?
-        """, session["user_id"])
+            EXCEPT
+            SELECT subjects.id, subjects.name, subjects.semester, subjects.credits, subjects.sections
+            FROM studying
+            JOIN sections ON studying.section_id = sections.id 
+            JOIN subjects ON sections.subject_id = subjects.id
+            JOIN grades ON studying.student_id = grades.student_id AND studying.section_id = grades.section_id
+            JOIN teaching ON studying.section_id = teaching.section_id
+            JOIN teachers ON teaching.teacher_id = teachers.id
+            WHERE studying.student_id = ?
+        """, session["user_id"], session["user_id"])
 
         return render_template("add_subjects.html", subjects_available=subjects_available)
 
@@ -369,36 +455,53 @@ def subjects():
     if request.method == "POST":
 
         selected = request.form.get("selected")
+        section = request.form.get("selected_section")
+
+        if not section:
+            return apology("no section selected", 400)
 
         teaching = db.execute("""
-            SELECT subject_id
+            SELECT teaching.section_id
             FROM teaching
-            WHERE teacher_id = ?
-            AND subject_id = ?
-        """, session["user_id"], selected)
+            JOIN sections ON teaching.section_id = sections.id
+            WHERE teaching.teacher_id = ?
+            AND sections.section_number = ?
+            AND sections.subject_id = ?
+        """, session["user_id"], section, selected)
 
         already = db.execute("""
-            SELECT subject_id
-            FROM teaching
-            WHERE subject_id = ?
-        """, selected)
+            SELECT teaching.teacher_id
+            FROM sections
+            JOIN teaching ON sections.id = teaching.section_id
+            WHERE sections.subject_id = ?
+            AND sections.section_number = ?
+        """, selected, section)
 
         if len(teaching) == 1:
             return apology("registered subject", 400)
         elif len(already) == 1:
-            return apology("another teacher already teachs this subject", 400)
+            return apology("another teacher already teachs this section", 400)
         else:
+            section_id = db.execute("""
+                SELECT id
+                FROM sections
+                WHERE subject_id = ?
+                AND section_number = ?
+            """, selected, section)
+            
+            print(section_id)
+
             db.execute("""
-                INSERT INTO teaching (teacher_id, subject_id) 
+                INSERT INTO teaching (teacher_id, section_id) 
                 VALUES(?, ?)
-            """, session["user_id"], selected)
+            """, session["user_id"], section_id[0]["id"])     
 
             return redirect("/")
         
     else:  
 
         subjects = db.execute("""
-            SELECT subjects.id, subjects.name, departments.field, subjects.semester
+            SELECT subjects.id, subjects.name, departments.field, subjects.semester, subjects.sections
             FROM subjects 
             JOIN departments ON subjects.department_id = departments.id
         """)
@@ -479,7 +582,7 @@ def register():
                     """, id, names, surnames, password, email, phone)
                 except ValueError:
                     return apology("registered username", 400)
-            
+        
         flash('Registered!', 'success')
         return redirect("/login")
 

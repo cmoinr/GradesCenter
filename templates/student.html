@@ -13,22 +13,36 @@
         <table>
             <thead>
                 <tr class="high">
+                    <th>Period</th>
                     <th>Name</th>
+                    <th>Section</th>
                     <th>Professor</th>
                     <th>Credits</th>
                     <th>Semester</th>
-                    <th>Grade</th>
+                    <th>Final Grade</th>
+                    <th>Strategies</th>
                 </tr>
             </thead>
             <tbody>
 
                 {% for subject in subjects %}
                     <tr>
+                        <td>{{ subject['period'] }}</td>
                         <td>{{ subject['name'] }}</td>
+                        <td>{{ subject['section_number'] }}</td>
                         <td>{{ subject['names'] }} {{ subject['last_names'] }}</td>
                         <td>{{ subject['credits'] }}</td>
                         <td>{{ subject['semester'] }}</td>
                         <td>{{ subject['grade'] }}</td>
+                        <td>
+                            <form action="/student" method="POST">
+                                <input class="enroll" type="hidden" name="check" value="{{ subject['id'] }}">
+                                <input class="enroll" type="hidden" name="subject_name" value="{{ subject['name'] }}">
+                                <input class="enroll" type="hidden" name="subject_section" value="{{ subject['section_number'] }}">
+                                <input class="enroll" type="hidden" name="subject_teacher" value="{{ subject['names'] }} {{ subject['last_names'] }}">
+                                <input class="enroll" type="submit" value="View">
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
 

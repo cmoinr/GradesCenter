@@ -1,11 +1,11 @@
-SELECT s.id, s.name, d.field, s.semester, COUNT(studying.student_id) AS 'enrolled'
-FROM subjects s
-JOIN departments d ON s.department_id = d.id
-JOIN teaching t ON s.id = t.subject_id
-JOIN teachers ts ON t.teacher_id = ts.id
-JOIN studying ON s.id = studying.subject_id
-WHERE t.teacher_id = ?
-GROUP BY s.id;
+-- SELECT s.id, s.name, d.field, s.semester, COUNT(studying.student_id) AS 'enrolled'
+-- FROM subjects s
+-- JOIN departments d ON s.department_id = d.id
+-- JOIN teaching t ON s.id = t.subject_id
+-- JOIN teachers ts ON t.teacher_id = ts.id
+-- JOIN studying ON s.id = studying.subject_id
+-- WHERE t.teacher_id = ?
+-- GROUP BY s.id;
 
 -- SELECT id, names, surnames, semester FROM students
 -- JOIN studying ON students.id = studying.id_student
@@ -71,3 +71,87 @@ GROUP BY s.id;
 -- FROM evaluated
 -- JOIN students ON evaluated.student_id = students.id
 -- WHERE evaluated.strategy_id = ?
+
+-- DELETE FROM studying;
+
+-- SELECT s.id, s.name, d.field, s.semester, COUNT(studying.student_id) AS 'enrolled'
+-- FROM subjects s
+-- JOIN departments d ON s.department_id = d.id
+-- JOIN teaching t ON s.id = t.subject_id AND s.id = t.section
+-- JOIN teachers ts ON t.teacher_id = ts.id
+-- JOIN studying ON s.id = studying.subject_id
+-- WHERE t.teacher_id = '23500120'
+-- GROUP BY s.id
+
+-- SELECT
+--     sections.period,
+--     subjects.id, 
+--     subjects.name, 
+--     sections.section_number, 
+--     departments.field, 
+--     subjects.semester, 
+--     COUNT(studying.student_id) AS 'enrolled'
+-- FROM teaching
+-- JOIN sections ON teaching.section_id = sections.id
+-- JOIN subjects ON sections.subject_id = subjects.id
+-- JOIN departments ON subjects.department_id = departments.id
+-- LEFT JOIN studying ON teaching.section_id = studying.section_id
+-- WHERE teaching.teacher_id = '23500120'
+-- GROUP BY teaching.section_id;
+
+-- SELECT teaching.section_id
+-- FROM teaching
+-- JOIN sections ON teaching.section_id = sections.id
+-- WHERE teaching.teacher_id = '23500120'
+-- AND sections.section_number = 2;
+
+-- SELECT teaching.teacher_id
+-- FROM sections
+-- JOIN teaching ON sections.id = teaching.section_id
+-- WHERE sections.subject_id = 'MA001'
+-- AND sections.section_number = 2;
+
+-- SELECT subjects.name 
+-- FROM sections 
+-- JOIN subjects ON sections.subject_id = subjects.id            
+-- WHERE sections.id = 64;
+
+-- SELECT sections.id, teaching.teacher_id
+-- FROM sections
+-- JOIN teaching ON sections.id = teaching.section_id
+-- WHERE sections.subject_id = 'MA001'  
+-- AND sections.section_number = 1
+-- AND sections.period = '2025-2';
+
+-- SELECT studying.student_id
+-- FROM sections
+-- JOIN studying ON sections.id = studying.section_id
+-- WHERE sections.subject_id = 'MA001'
+-- AND sections.period = '2025-2'
+-- AND studying.student_id = '30500100';
+
+-- SELECT subjects.id, subjects.name, subjects.semester, subjects.credits, subjects.sections
+-- FROM subjects
+-- JOIN students ON subjects.department_id = students.department_id
+-- WHERE students.id = '30500100'
+-- EXCEPT
+-- SELECT subjects.id, subjects.name, subjects.semester, subjects.credits, subjects.sections
+-- FROM studying
+-- JOIN sections ON studying.section_id = sections.id 
+-- JOIN subjects ON sections.subject_id = subjects.id
+-- JOIN grades ON studying.student_id = grades.student_id AND studying.section_id = grades.section_id
+-- JOIN teaching ON studying.section_id = teaching.section_id
+-- JOIN teachers ON teaching.teacher_id = teachers.id
+-- WHERE studying.student_id = '30500100';
+
+-- INSERT INTO studying (student_id, section_id)
+-- SELECT id, 28
+-- FROM students
+-- WHERE department_id = 'SE70'
+-- LIMIT 50;
+
+INSERT INTO grades (student_id, section_id, grade, teacher_id) 
+SELECT id, 28, 0, '23500120'
+FROM students
+WHERE department_id = 'SE70'
+LIMIT 50;

@@ -15,6 +15,7 @@
                     <th>Name</th>
                     <th>Semester</th>
                     <th>Credits</th>
+                    <th>Sections</th>
                     <th></th>
                 </tr>
             </thead>
@@ -25,12 +26,19 @@
                         <td>{{ subject['name'] }}</td>
                         <td>{{ subject['semester'] }}</td>
                         <td>{{ subject['credits'] }}</td>
-                        <td>
-                            <form action="/add_subjects" method="post">
+                        <form action="/add_subjects" method="POST">
+                            <td>
+                                {% for section in range(1, subject['sections'] + 1) %}
+                                    <input type="radio" name="selected_section" value="{{ section }}" style="height: 12px; width: 12px;">
+                                    {{ section }}
+                                    <br>
+                                {% endfor %}
+                            </td>
+                            <td>
                                 <input class="enroll" type="hidden" name="selected" value="{{ subject['id'] }}">
                                 <input class="enroll" type="submit" value="Enroll">
-                            </form>
-                        </td>
+                            </td>
+                        </form>
                     </tr>
                 {% endfor %}
 
