@@ -150,8 +150,32 @@
 -- WHERE department_id = 'SE70'
 -- LIMIT 50;
 
-INSERT INTO grades (student_id, section_id, grade, teacher_id) 
-SELECT id, 28, 0, '23500120'
-FROM students
-WHERE department_id = 'SE70'
-LIMIT 50;
+-- INSERT INTO grades (student_id, section_id, grade, teacher_id) 
+-- SELECT id, 28, 0, '23500120'
+-- FROM students
+-- WHERE department_id = 'SE70'
+-- LIMIT 50;
+
+-- UPDATE grades
+-- SET grade = (
+--     SELECT AVG(grade) FROM evaluated
+--     WHERE student_id = '12621509'
+-- )
+-- WHERE section_id = 28;
+
+-- UPDATE grades
+-- SET grade = (
+--     SELECT SUM(e.grade * s.percentage) / 100.0
+--     FROM evaluated e
+--     JOIN strategies s ON e.strategy_id = s.id
+--     WHERE e.student_id = grades.student_id
+--       AND s.section_id = 64
+-- )
+-- WHERE section_id = 64;
+
+-- UPDATE evaluated SET grade = 0
+-- WHERE grade IS NULL;
+
+-- SELECT *
+-- FROM grades
+-- WHERE student_id = '11005171';

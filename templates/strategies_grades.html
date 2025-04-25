@@ -10,50 +10,64 @@
         <h6>{{ strategy_selected[0]['type'] }} about: "{{ strategy_selected[0]['topic'] }}" | {{ strategy_selected[0]['percentage'] }}% | {{ strategy_selected[0]['date'] }}</h6>
     </div>
     <div class="mb-3">
-            <table>
-                <thead>
-                    <tr class="high">
-                        <th>ID <input class="filter" type="text" id="filterID" placeholder="filter"></th>
-                        <th>Names <input class="filter" type="text" id="filterName" placeholder="filter"></th>
-                        <th>Surnames <input class="filter" type="text" id="filterSurname" placeholder="filter"></th>
-                        <th>Grade</th>
-                        <th></th>
+        <button class="btn btn-primary" id="back_strategy" type="button" onclick="window.location.href='/strategies'">My Strategies</button>
+
+        <table>
+            <thead>
+                <tr class="high">
+                    <th>ID <input class="filter" type="text" id="filterID" placeholder="filter"></th>
+                    <th>Names <input class="filter" type="text" id="filterName" placeholder="filter"></th>
+                    <th>Surnames <input class="filter" type="text" id="filterSurname" placeholder="filter"></th>
+                    <th>Grade</th>
+                    <th>
+                        <div class="sort-container">
+                            <select id="sortOptions" class="sort-select">
+                                <option value="" disabled selected>Sort by</option>
+                                <option value="names">Names</option>
+                                <option value="surnames">Surnames</option>
+                                <option value="grade">Grade</option>
+                            </select>
+                            <button id="sortDirection" class="sort-button" title="Orden Ascendente/Descendente">
+                                ⇅
+                            </button>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for student in list_students %}
+                    <tr>
+                        <td>{{ student['student_id'] }}</td>
+                        <td>{{ student['names'] }}</td>
+                        <td>{{ student['last_names'] }}</td>
+                        <td>{{ student['grade'] }}</td>
+                        <td>                     
+                            <button class="btn btn-primary" type="button" onclick="showForm(this)">Edit</button>
+                            <form id="edit-form-{{ loop.index }}" style="display: none;" action="/strategies_grades" method="post">
+                                <input type="hidden" name="student_id" value="{{ student['student_id'] }}">
+                                <input type="hidden" name="strategy_id" value="{{ student['strategy_id'] }}">
+                                <input class="grade_value" type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10" minlength="1">
+                                <input class="enroll" type="submit" value="Save">
+                            </form>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
+                {% endfor %}
 
-                    {% for student in list_students %}
-                        <tr>
-                            <td>{{ student['student_id'] }}</td>
-                            <td>{{ student['names'] }}</td>
-                            <td>{{ student['last_names'] }}</td>
-                            <td>{{ student['grade'] }}</td>
-                            <td>                     
-                                <button class="btn btn-primary" type="button" onclick="showForm(this)">Edit</button>
-                                <form id="edit-form-{{ loop.index }}" style="display: none;" action="/strategies_grades" method="post">
-                                    <input type="hidden" name="student_id" value="{{ student['student_id'] }}">
-                                    <input type="hidden" name="strategy_id" value="{{ student['strategy_id'] }}">
-                                    <input class="grade_value" type="number" name="grade" placeholder="{{ student['grade'] }}" min="0" max="10" minlength="1">
-                                    <input class="enroll" type="submit" value="Save">
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            function showForm(button) {
+                // Obtener el índice de la fila (asumiendo que los botones tienen la misma estructura)
+                var rowIndex = button.parentNode.parentNode.rowIndex;
+                
+                // Obtener el ID del formulario
+                var formId = "edit-form-" + rowIndex;
 
-                </tbody>
-            </table>
-            <script>
-                function showForm(button) {
-                  // Obtener el índice de la fila (asumiendo que los botones tienen la misma estructura)
-                  var rowIndex = button.parentNode.parentNode.rowIndex;
-                  
-                  // Obtener el ID del formulario
-                  var formId = "edit-form-" + rowIndex;
-    
-                  // Mostrar el formulario
-                  document.getElementById(formId).style.display = "block";
-                }
-            </script>
+                // Mostrar el formulario
+                document.getElementById(formId).style.display = "block";
+            }
+        </script>
     </div>
 
     <script>
@@ -86,5 +100,47 @@
         filterName.addEventListener('keyup', filterTable);
         filterSurname.addEventListener('keyup', filterTable);
         // ... otros event listeners ...
+    </script>
+
+    <script>
+        const sortOptions = document.getElementById('sortOptions');
+        const sortDirectionButton = document.getElementById('sortDirection');
+        let isAscending = true; // Estado inicial: orden ascendente
+
+        sortOptions.addEventListener('change', sortTable);
+        sortDirectionButton.addEventListener('click', toggleSortDirection);
+
+        function toggleSortDirection() {
+            isAscending = !isAscending; // Alternar entre ascendente y descendente
+            sortDirectionButton.textContent = isAscending ? '⇅' : '⇵'; // Cambiar el ícono
+            sortTable(); // Reordenar la tabla con la nueva dirección
+        }
+
+        function sortTable() {
+            const rows = Array.from(document.querySelectorAll('table tbody tr'));
+            const sortBy = sortOptions.value;
+
+            rows.sort((a, b) => {
+                let aValue, bValue;
+
+                if (sortBy === 'names') {
+                    aValue = a.cells[1].textContent.toLowerCase();
+                    bValue = b.cells[1].textContent.toLowerCase();
+                } else if (sortBy === 'surnames') {
+                    aValue = a.cells[2].textContent.toLowerCase();
+                    bValue = b.cells[2].textContent.toLowerCase();
+                } else if (sortBy === 'grade') {
+                    aValue = parseFloat(a.cells[3].textContent) || 0;
+                    bValue = parseFloat(b.cells[3].textContent) || 0;
+                }
+
+                if (aValue < bValue) return isAscending ? -1 : 1;
+                if (aValue > bValue) return isAscending ? 1 : -1;
+                return 0;
+            });
+
+            const tbody = document.querySelector('table tbody');
+            rows.forEach(row => tbody.appendChild(row)); // Reordenar las filas en el DOM
+        }
     </script>
 {% endblock %}

@@ -175,8 +175,8 @@ def strategies():
             """, type, topic, section_id, session["user_id"], date)
 
             db.execute("""
-                INSERT INTO evaluated (strategy_id, student_id)
-                SELECT ?, students.id
+                INSERT INTO evaluated (strategy_id, student_id, grade)
+                SELECT ?, students.id, 0
                 FROM studying
                 JOIN grades ON studying.student_id = grades.student_id AND studying.section_id = grades.section_id
                 JOIN students ON studying.student_id = students.id
@@ -257,6 +257,7 @@ def strategies_grades():
             WHERE evaluated.strategy_id = ?
         """, session.get("strategy_id"))
 
+        # Strategy unique ID selected
         strategy_selected = db.execute("""
             SELECT type, topic, percentage, date
             FROM strategies
@@ -264,6 +265,38 @@ def strategies_grades():
         """, session.get("strategy_id"))
 
         return render_template("strategies_grades.html", list_students=list_students, strategy_selected=strategy_selected)
+    
+
+@app.route("/calculate_finalgrade", methods=["GET", "POST"])
+@login_required
+def calculate_finalgrade():
+    if request.method == "POST":
+        section_id = request.form.get("section_id")
+        try:
+            db.execute("""
+                UPDATE grades
+                SET grade = (
+                    SELECT SUM(evaluated.grade * strategies.percentage) / 100.0
+                    FROM evaluated
+                    JOIN strategies ON evaluated.strategy_id = strategies.id
+                    WHERE evaluated.student_id = grades.student_id
+                    AND strategies.section_id = ?
+                )
+                WHERE section_id = ?
+            """, section_id, section_id)
+        except ValueError:
+            return apology("Invalid data provided", 400)
+        except Exception as e:
+            # Log the error for debugging
+            print(f"Unexpected error: {e}")
+            return apology("Internal server error", 500)
+
+        flash("Final Grades updated", 'Success')
+        return redirect(url_for("strategies"))
+    
+    else:
+
+        return redirect(url_for("strategies"))
 
 
 @app.route("/student", methods=["GET", "POST"])

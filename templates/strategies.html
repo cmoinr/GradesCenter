@@ -62,6 +62,11 @@
                 </tbody>
             </table>
 
+            <form id="finalGradeForm" action="/calculate_finalgrade" method="POST" onsubmit="return validateFinalGradeForm()">
+                <input type="hidden" name="section_id" value="{{ section_name[0]['id'] }}">
+                <input class="btn btn-primary" type="submit" id="final_grade_btn" value="Calculate Final Grades">
+            </form> 
+
             <script>
                 function addStrategies() {
                     // Obtener todos los porcentajes actuales de la tabla
@@ -146,6 +151,26 @@
                     // Verificar si la suma de los porcentajes supera el 100
                     if (totalPercentage > 100) {
                         alert("El porcentaje total no puede superar el 100%. Ajuste los valores.");
+                        return false; // Evitar el envío del formulario
+                    }
+
+                    return true; // Permitir el envío del formulario
+                }
+
+                function validateFinalGradeForm() {
+                    // Obtener todos los porcentajes actuales de la tabla
+                    const rows = document.querySelectorAll('table tbody tr');
+                    let totalPercentage = 0;
+
+                    rows.forEach(row => {
+                        const percentageCell = row.cells[2]; // Índice de la columna de porcentaje
+                        const percentageValue = parseFloat(percentageCell.textContent) || 0;
+                        totalPercentage += percentageValue;
+                    });
+
+                    // Verificar si la suma de los porcentajes es igual a 100
+                    if (totalPercentage !== 100) {
+                        alert("La suma de los porcentajes de las estrategias debe ser exactamente 100% para calcular la calificación final.");
                         return false; // Evitar el envío del formulario
                     }
 

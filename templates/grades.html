@@ -17,7 +17,19 @@
                         <th>Names <input class="filter" type="text" id="filterName" placeholder="filter"></th>
                         <th>Surnames <input class="filter" type="text" id="filterSurname" placeholder="filter"></th>
                         <th>Final Grade</th>
-                        <th></th>
+                        <th>
+                            <div class="sort-container">
+                                <select id="sortOptions" class="sort-select">
+                                    <option value="" disabled selected>Sort by</option>
+                                    <option value="names">Names</option>
+                                    <option value="surnames">Surnames</option>
+                                    <option value="grade">Grade</option>
+                                </select>
+                                <button id="sortDirection" class="sort-button" title="Orden Ascendente/Descendente">
+                                    ⇅
+                                </button>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,5 +97,47 @@
         filterName.addEventListener('keyup', filterTable);
         filterSurname.addEventListener('keyup', filterTable);
         // ... otros event listeners ...
+    </script>
+
+    <script>
+        const sortOptions = document.getElementById('sortOptions');
+        const sortDirectionButton = document.getElementById('sortDirection');
+        let isAscending = true; // Estado inicial: orden ascendente
+
+        sortOptions.addEventListener('change', sortTable);
+        sortDirectionButton.addEventListener('click', toggleSortDirection);
+
+        function toggleSortDirection() {
+            isAscending = !isAscending; // Alternar entre ascendente y descendente
+            sortDirectionButton.textContent = isAscending ? '⇅' : '⇵'; // Cambiar el ícono
+            sortTable(); // Reordenar la tabla con la nueva dirección
+        }
+
+        function sortTable() {
+            const rows = Array.from(document.querySelectorAll('table tbody tr'));
+            const sortBy = sortOptions.value;
+
+            rows.sort((a, b) => {
+                let aValue, bValue;
+
+                if (sortBy === 'names') {
+                    aValue = a.cells[1].textContent.toLowerCase();
+                    bValue = b.cells[1].textContent.toLowerCase();
+                } else if (sortBy === 'surnames') {
+                    aValue = a.cells[2].textContent.toLowerCase();
+                    bValue = b.cells[2].textContent.toLowerCase();
+                } else if (sortBy === 'grade') {
+                    aValue = parseFloat(a.cells[3].textContent) || 0;
+                    bValue = parseFloat(b.cells[3].textContent) || 0;
+                }
+
+                if (aValue < bValue) return isAscending ? -1 : 1;
+                if (aValue > bValue) return isAscending ? 1 : -1;
+                return 0;
+            });
+
+            const tbody = document.querySelector('table tbody');
+            rows.forEach(row => tbody.appendChild(row)); // Reordenar las filas en el DOM
+        }
     </script>
 {% endblock %}
