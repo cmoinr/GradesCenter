@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Admin | Log In
+{% endblock %}
+
+{% block main %}
+    <button class="btn btn-primary" id="back_strategy" type="button" onclick="window.location.href='/login'">Public</button>
+    <form action="/admin_login" method="post" id="forms_access">
+        <div class="mb-3">
+            <input class="shaded-input" name="unique_code" placeholder="Unique Code" type="password" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Be Admin</button>
+    </form>
+{% endblock %}

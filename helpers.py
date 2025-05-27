@@ -4,7 +4,7 @@ from flask import redirect, render_template, session
 from functools import wraps
 
 
-def apology(message, code=400, template="default"):
+def apology(message, code=400, template="because", redirect_url="/"):
     """Render message as an apology to user."""
 
     def escape(s):
@@ -27,10 +27,11 @@ def apology(message, code=400, template="default"):
         return s
     
     meme = {
-        "default": "https://api.memegen.link/images/custom/"
-    } [template]
+        "default": "https://api.memegen.link/images/custom/",
+        "because": "https://api.memegen.link/images/because/"
+    }[template]
 
-    return render_template("apology.html", top=code, bottom=escape(message), meme=meme), code
+    return render_template("apology.html", top=code, bottom=escape(message), meme=meme, redirect_url=redirect_url), code
 
 
 def login_required(f):
@@ -46,4 +47,13 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
 
+    return decorated_function
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("role") != "admin":
+            return redirect("/admin_login")
+        return f(*args, **kwargs)
     return decorated_function

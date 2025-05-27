@@ -36,7 +36,16 @@ nav .navbar-brand
 }
 
 #main_bar {
-    background: #294661;
+    width: 100%; /* Asegura que abarque todo el ancho de la pantalla */
+    position: fixed; /* Fija la barra en su posición */
+    top: 0; /* Posición en la parte superior */
+    left: 0; /* Alineación al borde izquierdo */
+    background: #294661; /* Mantiene el color de fondo existente */
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+main {
+    margin-top: 7%;
 }
 
 h3, h5, h6 {
@@ -296,6 +305,8 @@ a {
     padding: 10px 20px;
     border-radius: 50px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 #final_grade_btn {
@@ -306,4 +317,8 @@ a {
     border-radius: 15px;
     margin-top: 15px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#forms_access {
+    margin-top: 30px;
 }

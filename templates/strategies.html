@@ -5,9 +5,10 @@
 {% endblock %}
 
 {% block main %}
+    <button class="btn btn-primary" id="back_strategy" type="button" onclick="window.location.href='/'">My Subjects</button>
     <div class="mb-3">
         <h5>Strategies on this subject:</h5>
-        <h6>{{ section_name[0]['name'] }} - Section {{ section_name[0]['section_number'] }}</h6>
+        <h6>{{ section_name[0]['name'] }} | Section {{ section_name[0]['section_number'] }} | Period {{ section_name[0]['period'] }}</h6>
     </div>
     <div class="mb-3">
             <button class="btn btn-primary" id="new_strategy" type="button" onclick="addStrategies()">Add New Strategy</button>

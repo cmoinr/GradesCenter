@@ -179,3 +179,7 @@
 -- SELECT *
 -- FROM grades
 -- WHERE student_id = '11005171';
+
+SELECT COUNT(student_id) AS 'enrolled'
+FROM studying
+WHERE section_id = 28;

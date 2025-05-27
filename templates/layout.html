@@ -31,6 +31,11 @@
                     <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
                         <span class="navbar-toggler-icon"></span>
                     </button>
+                {% elif session["role"] == "admin" %}
+                    <a class="navbar-brand" href="/admin">GradesCenter</a>
+                    <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
                 {% else %}
                     <a class="navbar-brand" href="/" id="main_brand">GradesCenter</a>
                     <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
@@ -57,7 +62,16 @@
                                 <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                             </ul>
                         {% endif %}
-
+                    
+                    {% elif session["admin"] %}
+                        <ul class="navbar-nav me-auto mt-2">
+                            <li class="nav-item"><a class="nav-link" href="/admin_pensums">Pensums</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin_teachers">Teachers</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin_settings">Settings</a></li>
+                        </ul>
+                        <ul class="navbar-nav ms-auto mt-2">
+                            <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                        </ul>
                     {% else %}
                         <ul class="navbar-nav ms-auto mt-2">
                             <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>

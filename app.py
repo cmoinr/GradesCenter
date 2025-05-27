@@ -5,7 +5,7 @@ from flask import Flask, flash, redirect, render_template, url_for, request, ses
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required
+from helpers import apology, login_required, admin_required
 
 # Configure application
 app = Flask(__name__)
@@ -110,7 +110,10 @@ def grades():
         section_id = session.get("selected_section")
 
         if not student_id or not grade:
-            return apology("incomplete data error", 400)
+            return apology("incomplete data error", 400, redirect_url="/grades")
+
+        if int(grade) < 0 or int(grade) > 10:
+            return apology("wrong data error", 400, redirect_url="/grades")
         
         if int(grade) >= 0 or int(grade) <= 10:
             db.execute("""
@@ -119,7 +122,7 @@ def grades():
                 AND section_id = ?
             """, int(grade), session["user_id"], obtener_fecha_venezuela(), student_id, section_id)
         else:
-            return apology("wrong data error", 400)
+            return apology("wrong data error", 400, redirect_url="/grades")
 
         return redirect("/grades")
     
@@ -158,7 +161,7 @@ def strategies():
             date = request.form.get("date")
 
             if not section_id or not type or not topic or not percentage or not date:
-                return apology("incomplete data error", 400)
+                return apology("incomplete data error", 400, redirect_url="/strategies")
 
             db.execute("""
                 INSERT INTO strategies (type, topic, percentage, section_id, teacher_id, date)
@@ -189,14 +192,13 @@ def strategies():
             date = request.form.get("editing_date")
 
             if not type or not topic or not percentage or not date:
-                return apology("incomplete data error", 400)
+                return apology("incomplete data error", 400, redirect_url="/strategies")
             
             db.execute("""
                 UPDATE strategies SET type = ?, topic = ?, percentage = ?, date = ?
                 WHERE id = ?
             """, type, topic, percentage, date, editing)
         
-
         return redirect("/strategies")
     
     else:  
@@ -209,7 +211,7 @@ def strategies():
         """, session.get("section_strategy"), session["user_id"])
 
         section_name = db.execute("""
-            SELECT sections.id, subjects.name, sections.section_number
+            SELECT sections.id, subjects.name, sections.section_number, sections.period
             FROM sections
             JOIN subjects ON sections.subject_id = subjects.id            
             WHERE sections.id = ?
@@ -229,7 +231,7 @@ def strategies_grades():
         strtgy_id = request.form.get("strategy_id")
 
         if not student_id or not grade:
-            return apology("incomplete data error", 400)
+            return apology("incomplete data error", 400, redirect_url=url_for("strategies_grades"))
         
         if int(grade) >= 0 or int(grade) <= 10:
             db.execute("""
@@ -238,7 +240,7 @@ def strategies_grades():
                 AND student_id = ?
             """, int(grade), strtgy_id, student_id)
         else:
-            return apology("wrong data error", 400)
+            return apology("wrong data error", 400, redirect_url=url_for("strategies_grades"))
 
         return redirect(url_for("strategies_grades"))
     
@@ -303,15 +305,14 @@ def calculate_finalgrade():
 @login_required
 def student():
     if request.method == "POST":
-        # Redirect to selected subject's list of students
         session["selected_section_student"] = request.form.get("check")
         session["selected_subject_name"] = request.form.get("subject_name")
         session["selected_subject_section"] = request.form.get("subject_section")
         session["selected_subject_teacher"] = request.form.get("subject_teacher")
         
         return redirect("/student_strategies")
+    
     else:
-        # Student main page
         subjects = db.execute("""
             SELECT subjects.name, subjects.semester, subjects.credits, grades.grade, teachers.names, teachers.last_names, sections.section_number, sections.period, sections.id
             FROM studying
@@ -359,7 +360,7 @@ def add_subjects():
         section = request.form.get("selected_section")
 
         if not section:
-            return apology("no section selected", 400)
+            return apology("no section selected", 400, redirect_url="/add_subjects")
 
         # Checking if there's a teacher teaching that subject
         teaching = db.execute("""
@@ -381,12 +382,22 @@ def add_subjects():
             AND studying.student_id = ?
         """, adding, obtener_trimestre_actual(), session["user_id"])
 
-        # Checking if a section is already full
-
         if len(teaching) == 0:
-            return apology("there's no teacher yet", 400)
+            return apology("there's no teacher yet", 400, redirect_url="/add_subjects")
         elif len(subjects) == 1:
-            return apology("registered subject", 400)
+            return apology("registered subject", 400, redirect_url="/add_subjects")
+
+        # Checking if a section is already full
+        availability = db.execute("""
+            SELECT COUNT(student_id) AS 'enrolled'
+            FROM studying
+            WHERE section_id = ?
+        """, teaching[0]["id"])
+
+        # Max number of students per section
+        if availability[0]["enrolled"] >= 50:
+            print(availability[0]["enrolled"])
+            return apology("This section is full", 400, redirect_url="/add_subjects")
         else:
             db.execute("""
                 INSERT INTO studying (student_id, section_id) VALUES (?, ?)
@@ -399,8 +410,7 @@ def add_subjects():
             flash("Subject added!", "success")
             return redirect("/student")
     
-    else:   
-            
+    else:           
         subjects_available = db.execute("""
             SELECT subjects.id, subjects.name, subjects.semester, subjects.credits, subjects.sections
             FROM subjects
@@ -435,7 +445,7 @@ def login():
         password = request.form.get("password")
 
         if not i_am or not id or not password:
-            return apology("all fields need to be filled", 400)
+            return apology("all fields need to be filled", 400, redirect_url="/login")
         
         if i_am == "student":
             session["role"] = "student"
@@ -445,7 +455,7 @@ def login():
 
             # Ensure username exists and password is correct
             if len(student) != 1 or not check_password_hash(student[0]["pw"], password):
-                return apology("invalid username and/or password", 403)
+                return apology("invalid username and/or password", 403, redirect_url="/login")
 
             # Remember which user has logged in
             session["user_id"] = student[0]["id"]
@@ -459,7 +469,7 @@ def login():
 
             # Ensure username exists and password is correct
             if len(teacher) != 1 or not check_password_hash(teacher[0]["pw"], password):
-                return apology("invalid username and/or password", 403)
+                return apology("invalid username and/or password", 403, redirect_url="/login")
 
             # Remember which user has logged in
             session["user_id"] = teacher[0]["id"]
@@ -491,7 +501,7 @@ def subjects():
         section = request.form.get("selected_section")
 
         if not section:
-            return apology("no section selected", 400)
+            return apology("no section selected", 400, redirect_url="/subjects")
 
         teaching = db.execute("""
             SELECT teaching.section_id
@@ -511,9 +521,9 @@ def subjects():
         """, selected, section)
 
         if len(teaching) == 1:
-            return apology("registered subject", 400)
+            return apology("registered subject", 400, redirect_url="/subjects")
         elif len(already) == 1:
-            return apology("another teacher already teachs this section", 400)
+            return apology("another teacher already teaches this section", 400, redirect_url="/subjects")
         else:
             section_id = db.execute("""
                 SELECT id
@@ -521,8 +531,6 @@ def subjects():
                 WHERE subject_id = ?
                 AND section_number = ?
             """, selected, section)
-            
-            print(section_id)
 
             db.execute("""
                 INSERT INTO teaching (teacher_id, section_id) 
@@ -531,8 +539,7 @@ def subjects():
 
             return redirect("/")
         
-    else:  
-
+    else:
         subjects = db.execute("""
             SELECT subjects.id, subjects.name, departments.field, subjects.semester, subjects.sections
             FROM subjects 
@@ -562,21 +569,21 @@ def register():
 
         # Validations
         if not i_am or not id or not names or not surnames or not password or not confirmation:
-            return apology("all fields need to be filled", 400)
+            return apology("all fields need to be filled", 400, redirect_url="/register")
         
         if not re.match(r"^\d{8}$", id):
-            return apology("ID must be only numbers", 400)
+            return apology("ID must be only numbers", 400, redirect_url="/register")
         elif not re.match(r"^[a-zA-Z]+$", names) or not re.match(r"^[a-zA-Z]+$", surnames):
-            return apology("Invalid names/surnames", 400)
+            return apology("Invalid names/surnames", 400, redirect_url="/register")
         
         if password == confirmation:
             password = generate_password_hash(confirmation, method='scrypt', salt_length=16)            
         else:
-            return apology("both passwords don't match", 400)
+            return apology("both passwords don't match", 400, redirect_url="/register")
         
         if i_am == "student":
             if not faculty:
-                return apology("all fields need to be filled", 400)
+                return apology("all fields need to be filled", 400, redirect_url="/register")
             
             if not email or not phone:
                 try:
@@ -585,7 +592,7 @@ def register():
                         VALUES(?, ?, ?, ?, ?)
                     """, id, names, surnames, password, faculty)
                 except ValueError:
-                    return apology("registered username", 400)
+                    return apology("registered username", 400, redirect_url="/register")
             else:
                 try:
                     db.execute("""
@@ -593,11 +600,11 @@ def register():
                         VALUES(?, ?, ?, ?, ?, ?, ?)
                     """, id, names, surnames, password, faculty, email, phone)
                 except ValueError:
-                    return apology("registered username", 400)
+                    return apology("registered username", 400, redirect_url="/register")
         
         elif i_am == "teacher":
             if not unique_code or unique_code != "TEACHER-00":
-                return apology("incorrect teacher code", 400)
+                return apology("incorrect teacher code", 400, redirect_url="/register")
             
             if not email or not phone:
                 try:
@@ -606,7 +613,7 @@ def register():
                         VALUES(?, ?, ?, ?)
                     """, id, names, surnames, password)
                 except ValueError:
-                    return apology("registered username", 400)
+                    return apology("registered username", 400, redirect_url="/register")
             else:
                 try:
                     db.execute("""
@@ -614,9 +621,9 @@ def register():
                         VALUES(?, ?, ?, ?, ?, ?)
                     """, id, names, surnames, password, email, phone)
                 except ValueError:
-                    return apology("registered username", 400)
+                    return apology("registered username", 400, redirect_url="/register")
         
-        flash('Registered!', 'success')
+        flash("Registered!", 'success')
         return redirect("/login")
 
     else:
@@ -632,22 +639,22 @@ def edit_pass():
         again = request.form.get("new_pass_again")
 
         if not old or not new or not again:
-            return apology("all fields need to be filled", 400)
+            return apology("all fields need to be filled", 400, redirect_url="/edit_pass")
 
 
         if session["role"] == "student":
             update = db.execute("SELECT pw FROM students WHERE id = ?", session["user_id"])
-            print(update)
+
             if check_password_hash(update[0]['pw'], old):
                 if new == again:
                     new = generate_password_hash(again, method='scrypt', salt_length=16)
                     db.execute("UPDATE students SET pw = ? WHERE id = ?", new, session["user_id"])
                 else:
-                    return apology("both passwords don't match", 400)
+                    return apology("both passwords don't match", 400, redirect_url="/edit_pass")
             else:
-                return apology("incorrect password", 403)
+                return apology("incorrect password", 403, redirect_url="/edit_pass")
             
-            flash('Password changed!', 'success')
+            flash("Password changed!", 'success')
             return redirect('/student')
             
         elif session["role"] == "teacher":
@@ -658,11 +665,11 @@ def edit_pass():
                     new = generate_password_hash(again, method='scrypt', salt_length=16)
                     db.execute("UPDATE teachers SET pw = ? WHERE id = ?", new, session["user_id"])
                 else:
-                    return apology("both passwords don't match", 400)
+                    return apology("both passwords don't match", 400, redirect_url="/edit_pass")
             else:
-                return apology("incorrect password", 403)
+                return apology("incorrect password", 403, redirect_url="/edit_pass")
             
-            flash('Password changed!', 'success')
+            flash("Password changed!", 'success')
             return redirect('/')
 
     else:
@@ -673,3 +680,97 @@ def edit_pass():
 @login_required
 def settings():
     return render_template("settings.html")
+
+
+@app.route("/admin_login", methods=["GET", "POST"])
+def admin_login():
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        
+        unique_code = request.form.get("unique_code")
+
+        if not unique_code:
+            return apology("This field need to be filled", 400, redirect_url="/admin_login")
+
+        if unique_code == "ADMIN-00":
+            # Remember which user has logged in
+            session["admin"] = "admin"
+            session["role"] = "admin"
+
+            return redirect("/admin")
+        else:
+            return apology("invalid admin code", 403, redirect_url="/admin_login")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("admin_login.html")
+    
+
+@app.route("/admin", methods=["GET", "POST"])
+@admin_required
+def admin():
+    if request.method == "POST":        
+        return redirect("/admin")
+
+    else:
+        return render_template("admin.html")
+
+
+@app.route("/admin_pensums", methods=["GET", "POST"])
+@admin_required
+def admin_pensums():
+    if request.method == "POST":
+
+        selected = request.form.get("selected")
+        section = request.form.get("selected_section")
+
+        if not section:
+            return apology("no section selected", 400, redirect_url="/subjects")
+
+        teaching = db.execute("""
+            SELECT teaching.section_id
+            FROM teaching
+            JOIN sections ON teaching.section_id = sections.id
+            WHERE teaching.teacher_id = ?
+            AND sections.section_number = ?
+            AND sections.subject_id = ?
+        """, session["user_id"], section, selected)
+
+        already = db.execute("""
+            SELECT teaching.teacher_id
+            FROM sections
+            JOIN teaching ON sections.id = teaching.section_id
+            WHERE sections.subject_id = ?
+            AND sections.section_number = ?
+        """, selected, section)
+
+        if len(teaching) == 1:
+            return apology("registered subject", 400, redirect_url="/subjects")
+        elif len(already) == 1:
+            return apology("another teacher already teaches this section", 400, redirect_url="/subjects")
+        else:
+            section_id = db.execute("""
+                SELECT id
+                FROM sections
+                WHERE subject_id = ?
+                AND section_number = ?
+            """, selected, section)
+
+            db.execute("""
+                INSERT INTO teaching (teacher_id, section_id) 
+                VALUES(?, ?)
+            """, session["user_id"], section_id[0]["id"])     
+
+            return redirect("/")
+        
+    else:
+        subjects = db.execute("""
+            SELECT subjects.id, subjects.name, departments.field, subjects.semester, subjects.sections, subjects.credits
+            FROM subjects 
+            JOIN departments ON subjects.department_id = departments.id
+        """)
+
+        return render_template("admin_pensums.html", subjects=subjects)

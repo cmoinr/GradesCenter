@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/login" method="post">
+    <button class="btn btn-primary" id="back_strategy" type="button" onclick="window.location.href='/admin_login'">Admin</button>
+    <form action="/login" method="post" id="forms_access">
         <div class="mb-3">
             <select id="role" name="i_am">
                 <option disabled="" selected="">I am...</option>

@@ -5,9 +5,10 @@
 {% endblock %}
 
 {% block main %}
+    <button class="btn btn-primary" id="back_strategy" type="button" onclick="window.location.href='/student'">I'm studying</button>
     <div class="mb-3">
         <h5>Strategies on this subject:</h5>
-        <h6>{{ info_subject[0] }} - Section {{ info_subject[1] }} | Taught by {{ info_subject[2] }}</h6>
+        <h6>{{ info_subject[0] }} | Section {{ info_subject[1] }} | Taught by {{ info_subject[2] }}</h6>
     </div>
     <div class="mb-3">
         <table>
