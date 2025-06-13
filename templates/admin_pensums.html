@@ -11,13 +11,13 @@
     </div>
     <div class="mb-3">
         <button class="btn btn-primary" id="new_strategy" type="button" onclick="addStrategies()">Add New Subject</button>
-        <form id="add_Strategies" style="display: none;" action="/strategies" method="POST">
+        <form id="add_Strategies" style="display: none;" action="/admin_subjects" method="POST">
             <input type="text" name="subject_id" placeholder="ID" required>
             <br><br>
             <input type="text" name="name" placeholder="Name" required>
             <br><br>
             <select id="faculty_select" name="department">
-                <option disabled="" selected="">Department</option>
+                <option disabled selected>Department</option>
                 <option value="SE70">Systems Engineering</option>
                 <option value="ME02">Medicine</option>
                 <option value="EC03">Economics</option>
@@ -27,7 +27,12 @@
                 <option value="PO90">Politics</option>
             </select>
             <br><br>
-            <input type="number" name="semester" placeholder="Semester" required>
+            <select id="semester_select" name="semester">
+                <option disabled selected>Semester</option>
+                {% for i in range(1, 13) %}
+                <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
             <br><br>
             <input type="number" name="credits" placeholder="Credits" required>
             <br><br>
@@ -41,9 +46,9 @@
                 <tr class="high">
                     <th>ID</th>
                     <th>Name <input class="filter" type="text" id="filterName" placeholder="filter"></th>
-                    <th>Faculty <input class="filter" type="text" id="filterFaculty" placeholder="filter"></th>
-                    <th>Semester</th>
-                    <th>Credits</th>
+                    <th>Faculty <select class="filter" id="filterFaculty"><option value="">All</option><option value="Systems Engineering">Systems Engineering</option><option value="Medicine">Medicine</option><option value="Economics">Economics</option><option value="Dentistry">Dentistry</option><option value="Agronomy">Agronomy</option><option value="Social Communication">Social Communication</option><option value="Politics">Politics</option></select></th>
+                    <th>Semester <select class="filter" id="filterSemester"><option value="">All</option>{% for i in range(1, 13) %}<option value="{{ i }}">{{ i }}</option>{% endfor %}</select></th>
+                    <th>Credits <input class="filter" type="number" id="filterCredits" placeholder="filter"></th>
                     <th>Sections</th>
                     <th></th>
                 </tr>
@@ -59,13 +64,12 @@
                         <td>{{ subject['sections'] }}</td>
                         <td>                     
                             <button class="btn btn-primary" type="button" onclick="editStrategies(this)">Edit</button>
-                            <form id="edit_Strategies" style="display: none;" action="/strategies" method="post">
-                                <input id="edit_strategy_form" type="text" name="editing_id" value="{{ subject['id'] }}">
-                                <input id="edit_strategy_form" type="text" name="editing_name" value="{{ subject['name'] }}" required>
-                                <input id="edit_strategy_form" type="text" name="editing_field" value="{{ subject['field'] }}" required>
-                                <input id="edit_strategy_form" type="number" name="editing_semester" value="{{ subject['semester'] }}" min="1" required>
-                                <input id="edit_strategy_form" type="number" name="editing_credits" value="{{ subject['credits'] }}" required>
-                                <input id="edit_strategy_form" type="number" name="editing_sections" value="{{ subject['sections'] }}" required>
+                            <form id="edit_Strategies" style="display: none;" action="/admin_subjects" method="post">
+                                <input id="edit_strategy_form" type="hidden" name="editing_id" value="{{ subject['id'] }}">
+                                <input id="edit_strategy_form" type="text" name="editing_name" value="{{ subject['name'] }}" placeholder="Name" required>                                
+                                <input id="edit_strategy_form" type="number" name="editing_semester" value="{{ subject['semester'] }}" placeholder="Semester" min="1" required>
+                                <input id="edit_strategy_form" type="number" name="editing_credits" value="{{ subject['credits'] }}" placeholder="Credits" required>
+                                <input id="edit_strategy_form" type="number" name="editing_sections" value="{{ subject['sections'] }}" placeholder="Sections" required>
                                 <input class="btn" id="strategy_save2" type="submit" value="Save">
                             </form>
                         </td>
@@ -75,52 +79,14 @@
         </table>
 
         <script>
-            function showForm(button) {
-                // Obtener el índice de la fila (asumiendo que los botones tienen la misma estructura)
-                var rowIndex = button.parentNode.parentNode.rowIndex;
-                
-                // Obtener el ID del formulario
-                var formId = "edit-form-" + rowIndex;
-
-                // Mostrar el formulario
-                document.getElementById(formId).style.display = "block";
-            }
-
             function addStrategies() {
-                // Obtener todos los porcentajes actuales de la tabla
-                const rows = document.querySelectorAll('table tbody tr');
-                let totalPercentage = 0;
-
-                rows.forEach(row => {
-                    const percentageCell = row.cells[2]; // Índice de la columna de porcentaje
-                    const percentageValue = parseFloat(percentageCell.textContent) || 0;
-                    totalPercentage += percentageValue;
-                });
-
-                // Verificar si la suma de los porcentajes supera el 100
-                if (totalPercentage >= 100) {
-                    alert("No se pueden agregar más estrategias. La suma de los porcentajes ya alcanza el 100%.");
-                    return;
-                }
-
-                // Mostrar el formulario si la suma es válida
                 document.getElementById("add_Strategies").style.display = "block";
             }
 
             function editStrategies(button) {
-                // Ocultar el botón
                 button.style.display = "none";
-                
-                // Mostrar el formulario
                 var form = button.nextElementSibling;
                 form.style.display = "block";
-
-                // Asignar validación al formulario de edición
-                form.addEventListener("submit", function(event) {
-                    if (!validateEditPercentageInput(form)) {
-                        event.preventDefault(); // Detener el envío del formulario
-                    }
-                });
             }
         </script>
     </div>
@@ -128,26 +94,32 @@
     <script>
         const filterName = document.getElementById('filterName');
         const filterFaculty = document.getElementById('filterFaculty');
-        // ... otros elementos de filtro ...
+        const filterSemester = document.getElementById('filterSemester');
+        const filterCredits = document.getElementById('filterCredits');
       
         function filterTable() {
           const rows = document.querySelectorAll('table tbody tr');
           const nameFilter = filterName.value.toLowerCase();
-          const facultyFilter = filterFaculty.value.toLowerCase();
+          const facultyFilter = filterFaculty.value;
+          const semesterFilter = filterSemester.value;
+          const creditsFilter = filterCredits.value;
       
           rows.forEach(row => {
-            const nameCell = row.cells[0]; // Ajusta el índice si la columna de nombre no es la tercera
-            const facultyCell = row.cells[1]; // Ajusta el índice si la columna de facultad no es la cuarta
+            const nameCell = row.cells[1];
+            const facultyCell = row.cells[2];
+            const semesterCell = row.cells[3];
+            const creditsCell = row.cells[4];
             const nameMatch = nameCell.textContent.toLowerCase().includes(nameFilter);
-            const facultyMatch = facultyCell.textContent.toLowerCase().includes(facultyFilter);
-      
-            row.style.display = nameMatch && facultyMatch ? '' : 'none';
+            const facultyMatch = !facultyFilter || facultyCell.textContent === facultyFilter;
+            const semesterMatch = !semesterFilter || semesterCell.textContent === semesterFilter;
+            const creditsMatch = !creditsFilter || creditsCell.textContent === creditsFilter;
+            row.style.display = nameMatch && facultyMatch && semesterMatch && creditsMatch ? '' : 'none';
           });
         }
       
-        // Asignar event listeners a todos los campos de filtro
         filterName.addEventListener('keyup', filterTable);
-        filterFaculty.addEventListener('keyup', filterTable);
-        // ... otros event listeners ...
+        filterFaculty.addEventListener('change', filterTable);
+        filterSemester.addEventListener('change', filterTable);
+        filterCredits.addEventListener('keyup', filterTable);
     </script>
 {% endblock %}

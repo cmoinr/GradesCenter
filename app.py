@@ -774,3 +774,79 @@ def admin_pensums():
         """)
 
         return render_template("admin_pensums.html", subjects=subjects)
+
+
+@app.route("/admin_subjects", methods=["GET", "POST"])
+@admin_required
+def admin_subjects():
+    if request.method == "POST":
+        editing_id = request.form.get("editing_id")
+        name = request.form.get("editing_name") or request.form.get("name")
+        field = request.form.get("department")
+        semester = request.form.get("editing_semester") or request.form.get("semester")
+        credits = request.form.get("editing_credits") or request.form.get("credits")
+        sections = int(request.form.get("editing_sections") or request.form.get("sections"))
+        subject_id = request.form.get("editing_id") or request.form.get("subject_id")
+
+        if editing_id:
+            # Obtener el número de secciones actual antes de actualizar
+            current_sections = db.execute("SELECT sections FROM subjects WHERE id = ?", editing_id)[0]["sections"]
+            db.execute("""
+                UPDATE subjects
+                SET name = ?, semester = ?, credits = ?, sections = ?
+                WHERE id = ?
+            """, name, semester, credits, sections, editing_id)
+
+            # Sincronizar tabla sections
+            if sections > current_sections:
+                # Agregar nuevas secciones
+                for n in range(current_sections + 1, sections + 1):
+                    db.execute("INSERT INTO sections (subject_id, section_number, period) VALUES (?, ?, ?)", editing_id, n, obtener_trimestre_actual())
+            elif sections < current_sections:
+                # Eliminar secciones sobrantes (y considerar advertencia si hay datos relacionados)
+                secciones_a_eliminar = list(range(sections + 1, current_sections + 1))
+                advertencias = []
+                for n in secciones_a_eliminar:
+                    section = db.execute(
+                        "SELECT id FROM sections WHERE subject_id = ? AND section_number = ?",
+                        editing_id, n
+                    )
+                    if section:
+                        section_id = section[0]["id"]
+                        insc = db.execute(
+                            "SELECT COUNT(*) AS count FROM studying WHERE section_id = ?", section_id
+                        )[0]["count"]
+                        calif = db.execute(
+                            "SELECT COUNT(*) AS count FROM grades WHERE section_id = ?", section_id
+                        )[0]["count"]
+                        if insc > 0 or calif > 0:
+                            advertencias.append(f"Sección {n} no se puede eliminar porque tiene datos relacionados.")
+                        else:
+                            db.execute(
+                                "DELETE FROM sections WHERE id = ?", section_id
+                            )
+                if advertencias:
+                    for advertencia in advertencias:
+                        flash(advertencia, "warning")
+                else:
+                    flash("Materia actualizada y secciones ajustadas correctamente.", "success")
+            else:
+                flash("Subject updated!", "success")
+        else:
+            # Agregar nueva materia
+            db.execute("""
+                INSERT INTO subjects (id, name, department_id, semester, credits, sections)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, subject_id, name, field, semester, credits, sections)
+            # Crear secciones para la nueva materia
+            for n in range(1, sections + 1):
+                db.execute("INSERT INTO sections (subject_id, section_number, period) VALUES (?, ?, ?)", subject_id, n, obtener_trimestre_actual())
+            flash("Subject added!", "success")
+        return redirect("/admin_subjects")
+    else:
+        subjects = db.execute("""
+            SELECT subjects.id, subjects.name, departments.field, subjects.semester, subjects.sections, subjects.credits
+            FROM subjects 
+            JOIN departments ON subjects.department_id = departments.id
+        """)
+        return render_template("admin_pensums.html", subjects=subjects)

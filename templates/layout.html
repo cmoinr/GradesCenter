@@ -83,24 +83,37 @@
         </nav>
 
         <main class="container py-5 text-center">
-            {% if get_flashed_messages() %}
-                <header>
-                    <div id="flash-message" class="alert alert-primary" role="alert">
-                        {{ get_flashed_messages() | join(" ") }}
-                    </div>
-                </header>
-                <script>
-                    // Espera 1 segundo y luego oculta el mensaje flash
-                    setTimeout(function() {
-                        const flashMessage = document.getElementById('flash-message');
-                        if (flashMessage) {
-                            flashMessage.style.transition = "opacity 0.5s ease";
-                            flashMessage.style.opacity = "0";
-                            setTimeout(() => flashMessage.style.display = "none", 500); // Oculta completamente después de la transición
-                        }
-                    }, 3000);
-                </script>
-            {% endif %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <header>
+                        {% for category, message in messages %}
+                            {% set alert_class = {
+                                'success': 'alert-success',
+                                'warning': 'alert-warning',
+                                'danger': 'alert-danger',
+                                'error': 'alert-danger',
+                                'info': 'alert-info',
+                                'primary': 'alert-primary'
+                            }[category] if category in ['success','warning','danger','error','info','primary'] else 'alert-primary' %}
+                            <div id="flash-message" class="alert {{ alert_class }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </header>
+                    <script>
+                        setTimeout(function() {
+                            const flashMessages = document.querySelectorAll('#flash-message');
+                            flashMessages.forEach(function(flashMessage) {
+                                if (flashMessage) {
+                                    flashMessage.style.transition = "opacity 0.5s ease";
+                                    flashMessage.style.opacity = "0";
+                                    setTimeout(() => flashMessage.style.display = "none", 500);
+                                }
+                            });
+                        }, 3000);
+                    </script>
+                {% endif %}
+            {% endwith %}
             {% block main %}{% endblock %}
         </main>
 
